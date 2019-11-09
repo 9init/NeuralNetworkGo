@@ -1,4 +1,4 @@
-package neuraln
+package NeuralNetwork
 
 import (
 	"errors"
@@ -10,62 +10,62 @@ import (
 )
 
 //Matrix is a Matrix from math
-type Matrix struct {
-	matrix [][]float64
+type Matrix_s struct {
+	Matrix [][]float64
 	col    int
 	row    int
 }
 
-func (m *Matrix) fromArray(array []float64) Matrix {
+func (m *Matrix_s) fromArray(array []float64) Matrix_s {
 	m.create(len(array), 1)
 	for i, v := range array {
-		m.matrix[i][0] = v
+		m.Matrix[i][0] = v
 	}
 	return *m
 }
 
-func (m *Matrix) create(col int, row int) Matrix {
+func (m *Matrix_s) create(col int, row int) Matrix_s {
 	m.col = col
 	m.row = row
-	m.matrix = make([][]float64, col)
-	for i := range m.matrix {
-		m.matrix[i] = make([]float64, row)
+	m.Matrix = make([][]float64, col)
+	for i := range m.Matrix {
+		m.Matrix[i] = make([]float64, row)
 	}
 
 	return *m
 }
 
-func (m *Matrix) randomize() {
+func (m *Matrix_s) randomize() {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
 			rand.Seed(time.Now().UnixNano())
 			time.Sleep(1)
 			n := rand.Float64()*(1-(-1)) - 1
-			m.matrix[i][j] = n
+			m.Matrix[i][j] = n
 		}
 	}
 }
 
-func (m *Matrix) addFromMatrix(sMatrix Matrix) Matrix {
+func (m *Matrix_s) addFromMatrix(sMatrix Matrix_s) Matrix_s {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
-			m.matrix[i][j] += sMatrix.matrix[i][j]
+			m.Matrix[i][j] += sMatrix.Matrix[i][j]
 		}
 	}
 	return *m
 }
 
 //Map takes a function and preform the function for every single value in the matrix
-func (m *Matrix) Map(f func(float64) float64) Matrix {
+func (m *Matrix_s) Map(f func(float64) float64) Matrix_s {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
-			m.matrix[i][j] = f(m.matrix[i][j])
+			m.Matrix[i][j] = f(m.Matrix[i][j])
 		}
 	}
 	return *m
 }
 
-func (m *Matrix) dotProduct(sMatrix Matrix) (Matrix, error) {
+func (m *Matrix_s) dotProduct(sMatrix Matrix_s) (Matrix_s, error) {
 	if m.row != sMatrix.col {
 		err := errors.New("rows must equal colomns")
 		return *m, err
@@ -79,27 +79,27 @@ func (m *Matrix) dotProduct(sMatrix Matrix) (Matrix, error) {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < sMatrix.row; j++ {
 			for k := 0; k < sMatrix.col; k++ {
-				nMatrix[i][j] += m.matrix[i][k] * sMatrix.matrix[k][j]
+				nMatrix[i][j] += m.Matrix[i][k] * sMatrix.Matrix[k][j]
 			}
 		}
 	}
 
-	m.matrix = nMatrix
+	m.Matrix = nMatrix
 	m.row = sMatrix.row
 	return *m, nil
 }
 
-func (m *Matrix) HarProduct(sMatrix Matrix) (Matrix, error) {
+func (m *Matrix_s) HarProduct(sMatrix Matrix_s) (Matrix_s, error) {
 	if m.row != sMatrix.row || m.col != sMatrix.col {
 		err := errors.New("rows&cols must equal")
 		return *m, err
 	}
 
-	nMatrix := new(Matrix).create(m.col, m.row)
+	nMatrix := new(Matrix_s).create(m.col, m.row)
 
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < sMatrix.row; j++ {
-			nMatrix.matrix[i][j] = m.matrix[i][j] * sMatrix.matrix[i][j]
+			nMatrix.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
 		}
 	}
 
@@ -108,29 +108,29 @@ func (m *Matrix) HarProduct(sMatrix Matrix) (Matrix, error) {
 }
 
 
-func (m *Matrix) multiply(n float64) Matrix {
+func (m *Matrix_s) multiply(n float64) Matrix_s {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
-				m.matrix[i][j] = m.matrix[i][j] * n
+				m.Matrix[i][j] = m.Matrix[i][j] * n
 			}
 	}
 	return *m
 }
 
-func (m *Matrix) suptractMatrix(sMatrix Matrix) Matrix {
+func (m *Matrix_s) suptractMatrix(sMatrix Matrix_s) Matrix_s {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
-			m.matrix[i][j] -= sMatrix.matrix[i][j]
+			m.Matrix[i][j] -= sMatrix.Matrix[i][j]
 		}
 	}
 	return *m
 }
 
-func (m *Matrix) transpose() (Matrix, error) {
-	result := new(Matrix).create(m.row, m.col)
+func (m *Matrix_s) transpose() (Matrix_s, error) {
+	result := new(Matrix_s).create(m.row, m.col)
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
-			result.matrix[j][i] = m.matrix[i][j]
+			result.Matrix[j][i] = m.Matrix[i][j]
 		}
 	}
 	*m = result
@@ -141,14 +141,14 @@ func (m *Matrix) transpose() (Matrix, error) {
 type NeuralN struct {
 	inputNodes    int
 	outputNodes   int
-	weightIH      Matrix
-	weightHO      Matrix
-	biasH         Matrix
-	biasO         Matrix
+	weightIH      Matrix_s
+	weightHO      Matrix_s
+	biasH         Matrix_s
+	biasO         Matrix_s
 	learning_Rate float64
 }
 
-func (neural *NeuralN) create(inputNodes, hiddenNodes, outputNodes int) NeuralN {
+func (neural *NeuralN) Create(inputNodes, hiddenNodes, outputNodes int) NeuralN {
 	neural.weightIH.create(hiddenNodes, inputNodes)
 	neural.weightIH.randomize()
 	neural.weightHO.create(outputNodes, hiddenNodes)
@@ -171,13 +171,13 @@ func (neural *NeuralN) check(inputArray, targetArray []float64){
 	}
 }
 
-func (neural *NeuralN) feedForword(inputArray []float64) Matrix{
+func (neural *NeuralN) FeedForword(inputArray []float64) Matrix_s{
 	if len(inputArray) != neural.inputNodes{
 		err := errors.New("Number of \"Input Nodes\" must equal the length of \"Inputed Array\" ")
 		log.Fatal(err)
 	}
 	
-	inputs := new(Matrix).fromArray(inputArray)
+	inputs := new(Matrix_s).fromArray(inputArray)
 	hidden := neural.weightIH
 	hidden.dotProduct(inputs)
 	hidden.addFromMatrix(neural.biasH)
@@ -189,11 +189,11 @@ func (neural *NeuralN) feedForword(inputArray []float64) Matrix{
 	return outputs
 }
 
-func (neural *NeuralN) train(inputArray, targetArray []float64) {
+func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	neural.check(inputArray, targetArray)
 	
-	targets := new(Matrix).fromArray(targetArray)
-	inputs := new(Matrix).fromArray(inputArray)
+	targets := new(Matrix_s).fromArray(targetArray)
+	inputs := new(Matrix_s).fromArray(inputArray)
 
 	hidden := neural.weightIH
 	hidden.dotProduct(inputs)
