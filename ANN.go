@@ -277,16 +277,3 @@ func sigmoid(n float64) float64 {
 func dsigmoid(n float64) float64 {
 	return n * (1 - n)
 }
-
-type objects struct {
-	inputs  []float64
-	outputs []float64
-}
-
-func shuffle(l *[]objects) {
-	rand.Seed(time.Now().UnixNano())
-	time.Sleep(1)
-	rand.Shuffle(len(*l), func(i, j int) { (*l)[i], (*l)[j] = (*l)[j], (*l)[i] })
-}
-
-}
