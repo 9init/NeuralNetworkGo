@@ -140,7 +140,6 @@ func (m *Matrix) transpose() (Matrix, error) {
 //NeuralN is a Neural Network
 type NeuralN struct {
 	inputNodes    int
-	hiddenNodes   int
 	outputNodes   int
 	weightIH      Matrix
 	weightHO      Matrix
@@ -158,11 +157,26 @@ func (neural *NeuralN) create(inputNodes, hiddenNodes, outputNodes int) NeuralN 
 	neural.biasH.randomize()
 	neural.biasO.create(outputNodes, 1)
 	neural.biasO.randomize()
-	neural.learning_Rate = 0.4
+	neural.learning_Rate = 0.2
+	neural.inputNodes=inputNodes
+	neural.outputNodes=outputNodes
 	return *neural
 }
 
-func (neural *NeuralN) feedForword(inputArray []float64) Matrix {
+//"check" is a function that check the input nodes and output nodes to avoid out of range error and some dump mistaks
+func (neural *NeuralN) check(inputArray, targetArray []float64){
+	if len(inputArray) != neural.inputNodes || len(targetArray) != neural.outputNodes{
+		err := errors.New("Number of (Input Nodes / Output Nodes) must equal the length of(Inputed Array / Trageted Array)")
+		log.Fatal(err)
+	}
+}
+
+func (neural *NeuralN) feedForword(inputArray []float64) Matrix{
+	if len(inputArray) != neural.inputNodes{
+		err := errors.New("Number of \"Input Nodes\" must equal the length of \"Inputed Array\" ")
+		log.Fatal(err)
+	}
+	
 	inputs := new(Matrix).fromArray(inputArray)
 	hidden := neural.weightIH
 	hidden.dotProduct(inputs)
@@ -176,8 +190,8 @@ func (neural *NeuralN) feedForword(inputArray []float64) Matrix {
 }
 
 func (neural *NeuralN) train(inputArray, targetArray []float64) {
-
-
+	neural.check(inputArray, targetArray)
+	
 	targets := new(Matrix).fromArray(targetArray)
 	inputs := new(Matrix).fromArray(inputArray)
 
@@ -213,7 +227,6 @@ func (neural *NeuralN) train(inputArray, targetArray []float64) {
 	hidden_T.transpose()
 	weights_HO_G, err := outputs_G.dotProduct(hidden_T)
 	if err != nil {
-		fmt.Println(1)
 		log.Fatal(err)
 	}
 
@@ -227,7 +240,6 @@ func (neural *NeuralN) train(inputArray, targetArray []float64) {
 	whoT.transpose()
 	hidden_errors, err := whoT.dotProduct(output_errors)
 	if err != nil {
-		fmt.Println(2)
 		log.Fatal(err)
 	}
 
@@ -237,7 +249,6 @@ func (neural *NeuralN) train(inputArray, targetArray []float64) {
 	//fmt.Println(hidden_G, "\n", hidden_errors)
 	_, err = hidden_G.HarProduct(hidden_errors)
 	if err != nil {
-		fmt.Println(3)
 		log.Fatal(err)
 	}
 	hidden_G.multiply(neural.learning_Rate)
@@ -248,7 +259,6 @@ func (neural *NeuralN) train(inputArray, targetArray []float64) {
 	weight_HI_Delta := hidden_G
 	_, err = weight_HI_Delta.dotProduct(input_T)
 	if err != nil {
-		fmt.Println(4)
 		log.Fatal(err)
 	}
 
@@ -289,15 +299,15 @@ func main() {
 		objects{[]float64{0,0}, []float64{0}},
 	}
 	
-
-	for i := 0; i < 3000; i++ {
+	//lets train our code :)
+	for i := 0; i < 1000; i++ {
 		for _, v := range list {
 			shuffle(&list)
 			nn.train(v.inputs, v.outputs)
 		}
 	}
 
-	test:=[][]float64{{0,1},{0,0},{1,0},{1,1}}
+	test:=[][]float64{{0,1},{0,0},{1,0},{1}}
 	for _, f := range test{
 		m := nn.feedForword(f)
 		for _, v := range m.matrix {
