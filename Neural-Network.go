@@ -1,4 +1,4 @@
-package NeuralNetwork
+package NeuralNetworkGo
 
 import (
 	"errors"
