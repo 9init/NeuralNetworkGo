@@ -1,4 +1,4 @@
-package main
+package neuraln
 
 import (
 	"errors"
@@ -288,34 +288,5 @@ func shuffle(l *[]objects) {
 	time.Sleep(1)
 	rand.Shuffle(len(*l), func(i, j int) { (*l)[i], (*l)[j] = (*l)[j], (*l)[i] })
 }
-
-func main() {
-	nn := new(NeuralN)
-	nn.create(2, 50, 1)
-	list := []objects{
-		objects{[]float64{1,0}, []float64{1}},
-		objects{[]float64{0,1}, []float64{1}},
-		objects{[]float64{1,1}, []float64{0}},
-		objects{[]float64{0,0}, []float64{0}},
-	}
-	
-	//lets train our code :)
-	for i := 0; i < 1000; i++ {
-		for _, v := range list {
-			shuffle(&list)
-			nn.train(v.inputs, v.outputs)
-		}
-	}
-
-	test:=[][]float64{{0,1},{0,0},{1,0},{1}}
-	for _, f := range test{
-		m := nn.feedForword(f)
-		for _, v := range m.matrix {
-			for _,v2:=range v{
-				fmt.Println(v2)
-			}
-		}
-		fmt.Print("\n")
-	}
 
 }
