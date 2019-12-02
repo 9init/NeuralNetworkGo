@@ -27,8 +27,9 @@ func (m *Matrix) FromArray(array []float64) {
 		m.Matrix[i][0] = v
 	}
 }
+//I think that nobody will use FromArray()! :]
 
-// NewFromArray hmm
+// NewFromArray it used to create matrix from slice (array)
 func NewFromArray(array []float64) Matrix {
 	nMatrix := NewMatrix(len(array), 1)
 	for i, v := range array {
@@ -37,6 +38,7 @@ func NewFromArray(array []float64) Matrix {
 	return nMatrix
 }
 
+// Create is a function to create new matrix....if it already created the matrix gonna change completley
 func (m *Matrix) Create(col int, row int) Matrix {
 	m.col = col
 	m.row = row
@@ -48,6 +50,7 @@ func (m *Matrix) Create(col int, row int) Matrix {
 	return *m
 }
 
+// Randomize is function to randomize the matrix
 func (m *Matrix) Randomize() {
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
@@ -59,13 +62,53 @@ func (m *Matrix) Randomize() {
 	}
 }
 
-func (m *Matrix) AddFromMatrix(sMatrix Matrix) Matrix {
+//StaticRandomize is a static version of Randomize()
+func (m *Matrix) StaticRandomize() Matrix {
+	nMatrix := *m
+	nMatrix.Randomize()
+	return nMatrix
+}
+
+// AddFromMatrix is a function to sum two matrices
+func (m *Matrix) AddFromMatrix(sMatrix Matrix) (Matrix, error) {
+	if m.col != sMatrix.col || m.row != sMatrix.row {
+		err := errors.New("Matrices dimensions must match")
+		return *m, err
+	}
+
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < m.row; j++ {
 			m.Matrix[i][j] += sMatrix.Matrix[i][j]
 		}
 	}
-	return *m
+	return *m, nil
+}
+
+// StaticAddFromMatrix is a static version of SuptractMatrix()
+func (m *Matrix) StaticAddFromMatrix(sMatrix Matrix) (Matrix, error) {
+	nMatrix := *m
+	return nMatrix.AddFromMatrix(sMatrix)
+}
+
+// SuptractMatrix is a function that subtract two matrices from each other
+func (m *Matrix) SuptractMatrix(sMatrix Matrix) (Matrix, error) {
+	if m.col != sMatrix.col || m.row != sMatrix.row {
+		err := errors.New("Matrices dimensions must match")
+		return *m, err
+	}
+
+	for i := 0; i < m.col; i++ {
+		for j := 0; j < m.row; j++ {
+			m.Matrix[i][j] -= sMatrix.Matrix[i][j]
+		}
+	}
+	return *m, nil
+}
+
+// StaticSuptractMatrix is a static version of SuptractMatrix()
+func (m *Matrix) StaticSuptractMatrix(sMatrix Matrix) (Matrix, error) {
+	nMatrix := *m
+	return nMatrix.SuptractMatrix(sMatrix)
 }
 
 //Map takes a function and preform the function for every single value in the matrix
@@ -91,20 +134,14 @@ func (m *Matrix) DotProduct(sMatrix Matrix) (Matrix, error) {
 		return *m, err
 	}
 
-	nMatrix := make([][]float64, m.col)
-	for i := range nMatrix {
-		nMatrix[i] = make([]float64, sMatrix.row)
-	}
-
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < sMatrix.row; j++ {
 			for k := 0; k < sMatrix.col; k++ {
-				nMatrix[i][j] += m.Matrix[i][k] * sMatrix.Matrix[k][j]
+				m.Matrix[i][j] += m.Matrix[i][k] * sMatrix.Matrix[k][j]
 			}
 		}
 	}
 
-	m.Matrix = nMatrix
 	m.row = sMatrix.row
 	return *m, nil
 }
@@ -122,15 +159,12 @@ func (m *Matrix) HadProduct(sMatrix Matrix) (Matrix, error) {
 		return *m, err
 	}
 
-	nMatrix := new(Matrix).Create(m.col, m.row)
-
 	for i := 0; i < m.col; i++ {
 		for j := 0; j < sMatrix.row; j++ {
-			nMatrix.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
+			m.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
 		}
 	}
 
-	*m = nMatrix
 	return *m, nil
 }
 
@@ -148,22 +182,6 @@ func (m *Matrix) Multiply(n float64) Matrix {
 		}
 	}
 	return *m
-}
-
-// SuptractMatrix is a function that subtract two matrices from each other
-func (m *Matrix) SuptractMatrix(sMatrix Matrix) Matrix {
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
-			m.Matrix[i][j] -= sMatrix.Matrix[i][j]
-		}
-	}
-	return *m
-}
-
-// StaticSuptractMatrix is a static version of SuptractMatrix()
-func (m *Matrix) StaticSuptractMatrix(sMatrix Matrix) Matrix {
-	nMatrix := *m
-	return nMatrix.SuptractMatrix(sMatrix)
 }
 
 // Transpose is a function that transpose the matrix
