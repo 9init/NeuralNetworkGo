@@ -6,7 +6,6 @@ import(
     "time"
     neuraln "github.com/9init/NeuralNetworkGo"
 )
-
 type objects struct {
 	inputs  []float64
 	outputs []float64
@@ -20,28 +19,29 @@ func shuffle(l *[]objects) {
 
 func main() {
 	var nn = new(neuraln.NeuralN)
-	nn.Create(2, 50, 1)
+	nn.Create(2, 8, 1)
 	list := []objects{
-		objects{[]float64{1,0}, []float64{1}},
-		objects{[]float64{0,1}, []float64{1}},
-		objects{[]float64{1,1}, []float64{0}},
-		objects{[]float64{0,0}, []float64{0}},
+		objects{[]float64{1, 0}, []float64{1}},
+		objects{[]float64{0, 1}, []float64{1}},
+		objects{[]float64{1, 1}, []float64{0}},
+		objects{[]float64{0, 0}, []float64{0}},
 	}
-	
+
 	//lets train our code :)
 	//you have to shuffle your list
-	for i := 0; i < 1000; i++ {
+	fmt.Printf("training\n")
+	for i := 0; i < 700; i++ {
 		for _, v := range list {
 			shuffle(&list)
 			nn.Train(v.inputs, v.outputs)
 		}
 	}
 
-	test:=[][]float64{{0,1},{0,0},{1,0},{1,1}}
-	for _, f := range test{
+	test := [][]float64{{0, 1}, {1, 1}}
+	for _, f := range test {
 		m := nn.FeedForword(f)
 		for _, v := range m.Matrix {
-			for _,v2:=range v{
+			for _, v2 := range v {
 				fmt.Println(v2)
 			}
 		}
@@ -49,3 +49,4 @@ func main() {
 	}
 
 }
+
