@@ -1,4 +1,4 @@
-package matrix
+package Matrix
 
 import (
 	"errors"
