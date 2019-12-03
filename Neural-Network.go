@@ -6,7 +6,7 @@ import (
 	"log"
 	"math"
 
-	Matrix "github.com/9init/Matrix/matrix"
+	Matrix "github.com/9init/NeuralNetworkGo/Matrix"
 )
 
 //NeuralN is a Neural Network
