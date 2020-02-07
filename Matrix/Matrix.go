@@ -16,8 +16,8 @@ type Matrix struct {
 // NewMatrix function for creating a Matrix
 // after import that package you can use it by type........
 // myMatrix := Matrix.NewMatrix(1, 3)
-func NewMatrix(col, row int) Matrix {
-	return new(Matrix).Create(col, row)
+func NewMatrix(row, col int) Matrix {
+	return new(Matrix).Create(row, col)
 }
 
 // FromArray it used to convert matrix completely to fit the array
@@ -38,12 +38,12 @@ func NewFromArray(array []float64) Matrix {
 }
 
 // Create is a function to create new matrix....if it already created the matrix gonna change completley
-func (m *Matrix) Create(col int, row int) Matrix {
+func (m *Matrix) Create(row, col int) Matrix {
 	m.col = col
 	m.row = row
-	m.Matrix = make([][]float64, col)
+	m.Matrix = make([][]float64, row)
 	for i := range m.Matrix {
-		m.Matrix[i] = make([]float64, row)
+		m.Matrix[i] = make([]float64, col)
 	}
 
 	return *m
@@ -51,8 +51,8 @@ func (m *Matrix) Create(col int, row int) Matrix {
 
 // Randomize is function to randomize the matrix
 func (m *Matrix) Randomize() {
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			rand.Seed(time.Now().UnixNano())
 			time.Sleep(1)
 			n := rand.Float64()*(1-(-1)) - 1
@@ -75,8 +75,8 @@ func (m *Matrix) AddFromMatrix(sMatrix Matrix) (Matrix, error) {
 		return *m, err
 	}
 
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			m.Matrix[i][j] += sMatrix.Matrix[i][j]
 		}
 	}
@@ -96,8 +96,8 @@ func (m *Matrix) SuptractMatrix(sMatrix Matrix) (Matrix, error) {
 		return *m, err
 	}
 
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			m.Matrix[i][j] -= sMatrix.Matrix[i][j]
 		}
 	}
@@ -112,8 +112,8 @@ func (m *Matrix) StaticSuptractMatrix(sMatrix Matrix) (Matrix, error) {
 
 //Map takes a function and preform the function for every single value in the matrix
 func (m *Matrix) Map(f func(float64) float64) Matrix {
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			m.Matrix[i][j] = f(m.Matrix[i][j])
 		}
 	}
@@ -128,15 +128,15 @@ func (m *Matrix) StaticMap(f func(float64) float64) Matrix {
 
 // DotProduct is a dot product function =
 func (m *Matrix) DotProduct(sMatrix Matrix) (Matrix, error) {
-	if m.row != sMatrix.col {
+	if m.col != sMatrix.row {
 		err := errors.New("rows must equal columns")
 		return *m, err
 	}
 
-	nMatrix := NewMatrix(m.col, sMatrix.row)
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < sMatrix.row; j++ {
-			for k := 0; k < sMatrix.col; k++ {
+	nMatrix := NewMatrix(m.row, sMatrix.col)
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < sMatrix.col; j++ {
+			for k := 0; k < sMatrix.row; k++ {
 				nMatrix.Matrix[i][j] += m.Matrix[i][k] * sMatrix.Matrix[k][j]
 			}
 		}
@@ -159,8 +159,8 @@ func (m *Matrix) HadProduct(sMatrix Matrix) (Matrix, error) {
 		return *m, err
 	}
 
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < sMatrix.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < sMatrix.col; j++ {
 			m.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
 		}
 	}
@@ -176,8 +176,8 @@ func (m *Matrix) StaticHadProduct(sMatrix Matrix) (Matrix, error) {
 
 //Multiply is a function to multiply a value by every single value in the matrix
 func (m *Matrix) Multiply(n float64) Matrix {
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			m.Matrix[i][j] = m.Matrix[i][j] * n
 		}
 	}
@@ -186,9 +186,9 @@ func (m *Matrix) Multiply(n float64) Matrix {
 
 // Transpose is a function that transpose the matrix
 func (m *Matrix) Transpose() (Matrix, error) {
-	result := new(Matrix).Create(m.row, m.col)
-	for i := 0; i < m.col; i++ {
-		for j := 0; j < m.row; j++ {
+	result := new(Matrix).Create(m.col, m.row)
+	for i := 0; i < m.row; i++ {
+		for j := 0; j < m.col; j++ {
 			result.Matrix[j][i] = m.Matrix[i][j]
 		}
 	}

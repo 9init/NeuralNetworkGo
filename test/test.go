@@ -1,11 +1,13 @@
 package main
 
-import(
-    "fmt"
-    "math/rand"
-    "time"
-    neuraln "github.com/9init/NeuralNetworkGo"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+
+	neuraln "github.com/9init/NeuralNetworkGo"
 )
+
 type objects struct {
 	inputs  []float64
 	outputs []float64
@@ -49,4 +51,3 @@ func main() {
 	}
 
 }
-
