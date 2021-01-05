@@ -9,15 +9,15 @@ import (
 /*Matrix it works only with float64 type*/
 type Matrix struct {
 	Matrix [][]float64
-	col    int
-	row    int
+	Col    int
+	Row    int
 }
 
 // NewMatrix function for creating a Matrix
 // after import that package you can use it by type........
 // myMatrix := Matrix.NewMatrix(1, 3)
-func NewMatrix(row, col int) Matrix {
-	return new(Matrix).Create(row, col)
+func NewMatrix(Row, Col int) Matrix {
+	return new(Matrix).Create(Row, Col)
 }
 
 // FromArray it used to convert matrix completely to fit the array
@@ -38,12 +38,12 @@ func NewFromArray(array []float64) Matrix {
 }
 
 // Create is a function to create new matrix....if it already created the matrix gonna change completley
-func (m *Matrix) Create(row, col int) Matrix {
-	m.col = col
-	m.row = row
-	m.Matrix = make([][]float64, row)
+func (m *Matrix) Create(Row, Col int) Matrix {
+	m.Col = Col
+	m.Row = Row
+	m.Matrix = make([][]float64, Row)
 	for i := range m.Matrix {
-		m.Matrix[i] = make([]float64, col)
+		m.Matrix[i] = make([]float64, Col)
 	}
 
 	return *m
@@ -51,8 +51,8 @@ func (m *Matrix) Create(row, col int) Matrix {
 
 // Randomize is function to randomize the matrix
 func (m *Matrix) Randomize() {
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			rand.Seed(time.Now().UnixNano())
 			time.Sleep(1)
 			n := rand.Float64()*(1-(-1)) - 1
@@ -70,13 +70,13 @@ func (m *Matrix) StaticRandomize() Matrix {
 
 // AddFromMatrix is a function to sum two matrices
 func (m *Matrix) AddFromMatrix(sMatrix Matrix) (Matrix, error) {
-	if m.col != sMatrix.col || m.row != sMatrix.row {
+	if m.Col != sMatrix.Col || m.Row != sMatrix.Row {
 		err := errors.New("Matrices dimensions must match")
 		return *m, err
 	}
 
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			m.Matrix[i][j] += sMatrix.Matrix[i][j]
 		}
 	}
@@ -91,13 +91,13 @@ func (m *Matrix) StaticAddFromMatrix(sMatrix Matrix) (Matrix, error) {
 
 // SuptractMatrix is a function that subtract two matrices from each other
 func (m *Matrix) SuptractMatrix(sMatrix Matrix) (Matrix, error) {
-	if m.col != sMatrix.col || m.row != sMatrix.row {
+	if m.Col != sMatrix.Col || m.Row != sMatrix.Row {
 		err := errors.New("Matrices dimensions must match")
 		return *m, err
 	}
 
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			m.Matrix[i][j] -= sMatrix.Matrix[i][j]
 		}
 	}
@@ -112,8 +112,8 @@ func (m *Matrix) StaticSuptractMatrix(sMatrix Matrix) (Matrix, error) {
 
 //Map takes a function and preform the function for every single value in the matrix
 func (m *Matrix) Map(f func(float64) float64) Matrix {
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			m.Matrix[i][j] = f(m.Matrix[i][j])
 		}
 	}
@@ -128,15 +128,15 @@ func (m *Matrix) StaticMap(f func(float64) float64) Matrix {
 
 // DotProduct is a dot product function =
 func (m *Matrix) DotProduct(sMatrix Matrix) (Matrix, error) {
-	if m.col != sMatrix.row {
+	if m.Col != sMatrix.Row {
 		err := errors.New("rows must equal columns")
 		return *m, err
 	}
 
-	nMatrix := NewMatrix(m.row, sMatrix.col)
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < sMatrix.col; j++ {
-			for k := 0; k < sMatrix.row; k++ {
+	nMatrix := NewMatrix(m.Row, sMatrix.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < sMatrix.Col; j++ {
+			for k := 0; k < sMatrix.Row; k++ {
 				nMatrix.Matrix[i][j] += m.Matrix[i][k] * sMatrix.Matrix[k][j]
 			}
 		}
@@ -154,13 +154,13 @@ func (m *Matrix) StaticDotProduct(sMatrix Matrix) (Matrix, error) {
 
 // HadProduct is hadamard product
 func (m *Matrix) HadProduct(sMatrix Matrix) (Matrix, error) {
-	if m.row != sMatrix.row || m.col != sMatrix.col {
+	if m.Row != sMatrix.Row || m.Col != sMatrix.Col {
 		err := errors.New("rows&cols must equal")
 		return *m, err
 	}
 
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < sMatrix.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < sMatrix.Col; j++ {
 			m.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
 		}
 	}
@@ -176,8 +176,8 @@ func (m *Matrix) StaticHadProduct(sMatrix Matrix) (Matrix, error) {
 
 //Multiply is a function to multiply a value by every single value in the matrix
 func (m *Matrix) Multiply(n float64) Matrix {
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			m.Matrix[i][j] = m.Matrix[i][j] * n
 		}
 	}
@@ -186,9 +186,9 @@ func (m *Matrix) Multiply(n float64) Matrix {
 
 // Transpose is a function that transpose the matrix
 func (m *Matrix) Transpose() (Matrix, error) {
-	result := new(Matrix).Create(m.col, m.row)
-	for i := 0; i < m.row; i++ {
-		for j := 0; j < m.col; j++ {
+	result := new(Matrix).Create(m.Col, m.Row)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
 			result.Matrix[j][i] = m.Matrix[i][j]
 		}
 	}

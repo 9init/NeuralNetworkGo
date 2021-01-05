@@ -1,6 +1,8 @@
 package NeuralNetworkGo
 
 import (
+	"log"
+
 	Matrix "github.com/9init/NeuralNetworkGo/Matrix"
 )
 
@@ -10,11 +12,11 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	targets := Matrix.NewFromArray(targetArray)
 	inputs := Matrix.NewFromArray(inputArray)
 
-	hidden, _ := neural.weightIH.StaticDotProduct(inputs)
-	hidden.AddFromMatrix(neural.biasH)
+	hidden, _ := neural.WeightIH.StaticDotProduct(inputs)
+	hidden.AddFromMatrix(neural.BiasH)
 	hidden.Map(sigmoid)
-	outputs, err := neural.weightHO.StaticDotProduct(hidden)
-	outputs.AddFromMatrix(neural.biasO)
+	outputs, err := neural.WeightHO.StaticDotProduct(hidden)
+	outputs.AddFromMatrix(neural.BiasO)
 	outputs.Map(sigmoid)
 
 	// calculate weights between hidden and outputs
@@ -27,10 +29,10 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	outputs_G.Map(dsigmoid)
 	_, err = outputs_G.HadProduct(output_errors)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	outputs_G.Multiply(neural.learning_Rate)
+	outputs_G.Multiply(neural.LearningRate)
 
 	// Calculate delta
 	// Learning rate * Error *
@@ -38,20 +40,20 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	hidden_T.Transpose()
 	weights_HO_G, err := outputs_G.StaticDotProduct(hidden_T)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Adjust the weight by delta
-	neural.weightHO.AddFromMatrix(weights_HO_G)
+	neural.WeightHO.AddFromMatrix(weights_HO_G)
 	// Adjust the bias by gradient
-	neural.biasO.AddFromMatrix(outputs_G)
+	neural.BiasO.AddFromMatrix(outputs_G)
 
 	// Calculate hidden layer error
-	whoT := neural.weightHO
+	whoT := neural.WeightHO
 	whoT.Transpose()
 	hidden_errors, err := whoT.StaticDotProduct(output_errors)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Calculate hidden gradient
@@ -60,21 +62,21 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	//fmt.Println(hidden_G, "\n", hidden_errors)
 	_, err = hidden_G.HadProduct(hidden_errors)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	hidden_G.Multiply(neural.learning_Rate)
+	hidden_G.Multiply(neural.LearningRate)
 
 	// Calculate input->hidden deltas
 	input_T := inputs
 	input_T.Transpose()
 	weight_HI_Delta, _ := hidden_G.StaticDotProduct(input_T)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Adjust the weight by delta
-	neural.weightIH.AddFromMatrix(weight_HI_Delta)
+	neural.WeightIH.AddFromMatrix(weight_HI_Delta)
 	// Adjust the bias by grediant
-	neural.biasH.AddFromMatrix(hidden_G)
+	neural.BiasH.AddFromMatrix(hidden_G)
 
 }
