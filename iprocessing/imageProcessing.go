@@ -4,54 +4,11 @@ import (
 	"image"
 	"image/color"
 	"image/jpeg"
-	"log"
 	"os"
 	"sort"
 
 	"golang.org/x/image/draw"
 )
-
-var convFilter = [11]float64{
-	-1, -1, -1,
-	-1, 8, -1,
-	-1, -1, -1,
-	1, 1,
-}
-
-var leftEdge = [11]float64{
-	-1, 1, 0,
-	-1, 1, 0,
-	-1, 1, 0,
-	1, 1,
-}
-
-var rightEdge = [11]float64{
-	0, 1, -1,
-	0, 1, -1,
-	0, 1, -1,
-	1, 1,
-}
-
-var topEdge = [11]float64{
-	-1, -1, -1,
-	1, 1, 1,
-	0, 0, 0,
-	1, 1,
-}
-
-var downEdge = [11]float64{
-	0, 0, 0,
-	1, 1, 1,
-	-1, -1, -1,
-	1, 1,
-}
-
-var gaussianBlur = [11]float64{
-	1, 2, 1,
-	2, 4, 2,
-	1, 2, 1,
-	0.0625, 6,
-}
 
 func saveImage(picture *image.Image, name string) {
 	f, err := os.Create(name)
@@ -60,11 +17,6 @@ func saveImage(picture *image.Image, name string) {
 	options := jpeg.Options{Quality: 100}
 	jpeg.Encode(f, *picture, &options)
 
-}
-func errorHandler(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 //RGB (R)ed (G)reen (B)lue
@@ -232,9 +184,8 @@ func process(imagePath string, filter [11]float64, yDim, xDim int) *[][]RGB {
 	maxBooling(imgArr)
 	applykernel(imgArr, filter, len(*imgArr), len((*imgArr)[0]))
 	maxBooling(imgArr)
-	applykernel(imgArr, filter, len(*imgArr), len((*imgArr)[0]))
-	maxBooling(imgArr)
-
+	// applykernel(imgArr, filter, len(*imgArr), len((*imgArr)[0]))
+	// maxBooling(imgArr)
 	return imgArr
 }
 
@@ -248,33 +199,33 @@ func SetUpTrainingData(imagePath string, yDim, xDim int) *[]float64 {
 		}
 	}
 
-	img2 := process(imagePath, leftEdge, yDim, xDim)
-	for _, v := range *img2 {
-		for _, Col := range v {
-			data = append(data, Col.R/0xff)
-		}
-	}
+	// img2 := process(imagePath, leftEdge, yDim, xDim)
+	// for _, v := range *img2 {
+	// 	for _, Col := range v {
+	// 		data = append(data, Col.R/0xff)
+	// 	}
+	// }
 
-	img3 := process(imagePath, rightEdge, yDim, xDim)
-	for _, v := range *img3 {
-		for _, Col := range v {
-			data = append(data, Col.R/0xff)
-		}
-	}
+	// img3 := process(imagePath, rightEdge, yDim, xDim)
+	// for _, v := range *img3 {
+	// 	for _, Col := range v {
+	// 		data = append(data, Col.R/0xff)
+	// 	}
+	// }
 
-	img4 := process(imagePath, topEdge, yDim, xDim)
-	for _, v := range *img4 {
-		for _, Col := range v {
-			data = append(data, Col.R/0xff)
-		}
-	}
+	// img4 := process(imagePath, topEdge, yDim, xDim)
+	// for _, v := range *img4 {
+	// 	for _, Col := range v {
+	// 		data = append(data, Col.R/0xff)
+	// 	}
+	// }
 
-	img5 := process(imagePath, downEdge, yDim, xDim)
-	for _, v := range *img5 {
-		for _, Col := range v {
-			data = append(data, Col.R/0xff)
-		}
-	}
+	// img5 := process(imagePath, downEdge, yDim, xDim)
+	// for _, v := range *img5 {
+	// 	for _, Col := range v {
+	// 		data = append(data, Col.R/0xff)
+	// 	}
+	// }
 
 	return &data
 }
