@@ -15,75 +15,91 @@ import (
 //   - inputs: A matrix representing the input values to the neural network.
 //   - targets: A matrix representing the target output values for the given inputs.
 //
-// If any matrix operations fail, the function will log a fatal error.
-func (neural *Neural) backPropagate(inputs matrix.Matrix, targets matrix.Matrix) error {
-	hidden, _ := neural.WeightIH.StaticDotProduct(inputs)
-	hidden.AddFromMatrix(neural.BiasH)
-	hidden.Map(sigmoid)
-	outputs, _ := neural.WeightHO.StaticDotProduct(hidden)
-	outputs.AddFromMatrix(neural.BiasO)
-	outputs.Map(sigmoid)
+// If any matrix operations fail, the function will return an error.
+func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matrix) error {
+	// Forward pass
+	hidden, err := neural.WeightIH.DotProduct(inputs)
+	if err != nil {
+		return err
+	}
+	hidden, err = hidden.AddFromMatrix(neural.BiasH)
+	if err != nil {
+		return err
+	}
+	hidden = hidden.Map(sigmoid)
 
-	// calculate weights between hidden and outputs
-	output_errors := targets
-	output_errors.SuptractMatrix(outputs)
+	outputs, err := neural.WeightHO.DotProduct(hidden)
+	if err != nil {
+		return err
+	}
+	outputs, err = outputs.AddFromMatrix(neural.BiasO)
+	if err != nil {
+		return err
+	}
+	outputs = outputs.Map(sigmoid)
+
+	// Calculate output errors
+	outputErrors, err := targets.SubtractMatrix(outputs)
+	if err != nil {
+		return err
+	}
 
 	// Calculate output gradient
-	// X * (1 - X) -> dsigmoid
-	outputs_G := outputs
-	outputs_G.Map(dsigmoid)
-	_, err := outputs_G.HadProduct(output_errors)
+	outputGradients := outputs.Map(dsigmoid)
+	outputGradients, err = outputGradients.HadProduct(outputErrors)
+	if err != nil {
+		return err
+	}
+	outputGradients = outputGradients.Multiply(neural.LearningRate)
+
+	// Calculate delta for weights between hidden and output layers
+	hiddenTransposed := hidden.Transpose()
+	weightsHODelta, err := outputGradients.DotProduct(hiddenTransposed)
 	if err != nil {
 		return err
 	}
 
-	outputs_G.Multiply(neural.LearningRate)
-
-	// Calculate delta
-	// Learning rate * Error *
-	hidden_T := hidden
-	hidden_T.Transpose()
-	weights_HO_G, err := outputs_G.StaticDotProduct(hidden_T)
+	// Adjust weights and biases for the output layer
+	neural.WeightHO, err = neural.WeightHO.AddFromMatrix(weightsHODelta)
+	if err != nil {
+		return err
+	}
+	neural.BiasO, err = neural.BiasO.AddFromMatrix(outputGradients)
 	if err != nil {
 		return err
 	}
 
-	// Adjust the weight by delta
-	neural.WeightHO.AddFromMatrix(weights_HO_G)
-	// Adjust the bias by gradient
-	neural.BiasO.AddFromMatrix(outputs_G)
-
-	// Calculate hidden layer error
-	whoT := neural.WeightHO
-	whoT.Transpose()
-	hidden_errors, err := whoT.StaticDotProduct(output_errors)
+	// Calculate hidden layer errors
+	weightHOTransposed := neural.WeightHO.Transpose()
+	hiddenErrors, err := weightHOTransposed.DotProduct(outputErrors)
 	if err != nil {
 		return err
 	}
 
 	// Calculate hidden gradient
-	hidden_G := hidden
-	hidden_G.Map(dsigmoid)
-	//fmt.Println(hidden_G, "\n", hidden_errors)
-	_, err = hidden_G.HadProduct(hidden_errors)
+	hiddenGradients := hidden.Map(dsigmoid)
+	hiddenGradients, err = hiddenGradients.HadProduct(hiddenErrors)
+	if err != nil {
+		return err
+	}
+	hiddenGradients = hiddenGradients.Multiply(neural.LearningRate)
+
+	// Calculate delta for weights between input and hidden layers
+	inputsTransposed := inputs.Transpose()
+	weightsIHDelta, err := hiddenGradients.DotProduct(inputsTransposed)
 	if err != nil {
 		return err
 	}
 
-	hidden_G.Multiply(neural.LearningRate)
-
-	// Calculate input->hidden deltas
-	input_T := inputs
-	input_T.Transpose()
-	weight_HI_Delta, err := hidden_G.StaticDotProduct(input_T)
+	// Adjust weights and biases for the hidden layer
+	neural.WeightIH, err = neural.WeightIH.AddFromMatrix(weightsIHDelta)
 	if err != nil {
 		return err
 	}
-
-	// Adjust the weight by delta
-	neural.WeightIH.AddFromMatrix(weight_HI_Delta)
-	// Adjust the bias by grediant
-	neural.BiasH.AddFromMatrix(hidden_G)
+	neural.BiasH, err = neural.BiasH.AddFromMatrix(hiddenGradients)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

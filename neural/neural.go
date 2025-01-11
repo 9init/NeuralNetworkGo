@@ -9,10 +9,10 @@ import (
 type Neural struct {
 	InputNodes   int
 	OutputNodes  int
-	WeightIH     matrix.Matrix
-	WeightHO     matrix.Matrix
-	BiasH        matrix.Matrix
-	BiasO        matrix.Matrix
+	WeightIH     *matrix.Matrix
+	WeightHO     *matrix.Matrix
+	BiasH        *matrix.Matrix
+	BiasO        *matrix.Matrix
 	LearningRate float64
 }
 

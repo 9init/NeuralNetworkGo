@@ -31,7 +31,7 @@ func TestTrain(t *testing.T) {
 }
 
 func TestFeedForword(t *testing.T) {
-	nn := neuraln.New(2, 1000, 1)
+	nn := neuraln.New(2, 500, 1)
 
 	inputsData := [][]float64{
 		{1, 0}, {0, 1}, {1, 1}, {0, 0},
@@ -63,7 +63,7 @@ func TestFeedForword(t *testing.T) {
 
 		roundedPrediction := math.Round(predictions[0])
 		if roundedPrediction != data[1][0] {
-			t.Errorf("TestFeedForword failed on %v: expected %v, got %v", data[0], data[1][0], roundedPrediction)
+			t.Errorf("TestFeedForword failed on %v: expected %v, got %v, predictions: %v", data[0], data[1][0], roundedPrediction, predictions)
 			return
 		}
 	}
