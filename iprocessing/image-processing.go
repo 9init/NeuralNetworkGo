@@ -19,7 +19,7 @@ func saveImage(picture *image.Image, name string) {
 
 }
 
-//RGB (R)ed (G)reen (B)lue
+// RGB (R)ed (G)reen (B)lue
 type RGB struct {
 	R float64
 	G float64

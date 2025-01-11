@@ -1,21 +1,26 @@
-package NeuralNetworkGo
+package neural
 
 import (
-	"log"
-
-	Matrix "github.com/9init/NeuralNetworkGo/Matrix"
+	"neuraln/matrix"
 )
 
-func (neural *NeuralN) Train(inputArray, targetArray []float64) {
-	neural.check(inputArray, targetArray)
-
-	targets := Matrix.NewFromArray(targetArray)
-	inputs := Matrix.NewFromArray(inputArray)
-
+// backPropagate performs the backpropagation algorithm using Gradient Descent to adjust
+// the weights and biases of the neural network based on the provided inputs and target outputs.
+//
+// The function computes the error between the predicted outputs and the target outputs,
+// then propagates this error backward through the network to calculate gradients.
+// These gradients are used to update the weights and biases, minimizing the error.
+//
+// Parameters:
+//   - inputs: A matrix representing the input values to the neural network.
+//   - targets: A matrix representing the target output values for the given inputs.
+//
+// If any matrix operations fail, the function will log a fatal error.
+func (neural *Neural) backPropagate(inputs matrix.Matrix, targets matrix.Matrix) error {
 	hidden, _ := neural.WeightIH.StaticDotProduct(inputs)
 	hidden.AddFromMatrix(neural.BiasH)
 	hidden.Map(sigmoid)
-	outputs, err := neural.WeightHO.StaticDotProduct(hidden)
+	outputs, _ := neural.WeightHO.StaticDotProduct(hidden)
 	outputs.AddFromMatrix(neural.BiasO)
 	outputs.Map(sigmoid)
 
@@ -27,9 +32,9 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	// X * (1 - X) -> dsigmoid
 	outputs_G := outputs
 	outputs_G.Map(dsigmoid)
-	_, err = outputs_G.HadProduct(output_errors)
+	_, err := outputs_G.HadProduct(output_errors)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	outputs_G.Multiply(neural.LearningRate)
@@ -40,7 +45,7 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	hidden_T.Transpose()
 	weights_HO_G, err := outputs_G.StaticDotProduct(hidden_T)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Adjust the weight by delta
@@ -53,7 +58,7 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	whoT.Transpose()
 	hidden_errors, err := whoT.StaticDotProduct(output_errors)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Calculate hidden gradient
@@ -62,16 +67,17 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	//fmt.Println(hidden_G, "\n", hidden_errors)
 	_, err = hidden_G.HadProduct(hidden_errors)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
 	hidden_G.Multiply(neural.LearningRate)
 
 	// Calculate input->hidden deltas
 	input_T := inputs
 	input_T.Transpose()
-	weight_HI_Delta, _ := hidden_G.StaticDotProduct(input_T)
+	weight_HI_Delta, err := hidden_G.StaticDotProduct(input_T)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Adjust the weight by delta
@@ -79,4 +85,5 @@ func (neural *NeuralN) Train(inputArray, targetArray []float64) {
 	// Adjust the bias by grediant
 	neural.BiasH.AddFromMatrix(hidden_G)
 
+	return nil
 }
