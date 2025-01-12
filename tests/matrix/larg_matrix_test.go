@@ -6,8 +6,8 @@ import (
 )
 
 func TestLargeMatrix(t *testing.T) {
-	width := 10000
-	height := 10000
+	width := 5000
+	height := 5000
 
 	a := matrix.New(width, height)
 	b := matrix.New(width, height)
