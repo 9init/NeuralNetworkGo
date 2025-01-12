@@ -41,7 +41,7 @@ func TestFeedForword(t *testing.T) {
 		{1}, {1}, {0}, {0},
 	}
 
-	err := nn.Train(inputsData, outputsData, 10)
+	err := nn.Train(inputsData, outputsData, 50)
 	if err != nil {
 		t.Errorf("TestFeedForword failed: %v", err)
 		return

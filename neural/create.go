@@ -11,7 +11,7 @@ func (neural *Neural) Create(inputNodes, hiddenNodes, outputNodes int) *Neural {
 	neural.BiasH = matrix.New(hiddenNodes, 1).Randomize()
 	neural.BiasO = matrix.New(outputNodes, 1).Randomize()
 
-	neural.LearningRate = 0.01
+	neural.LearningRate = 1
 	neural.InputNodes = inputNodes
 	neural.OutputNodes = outputNodes
 
