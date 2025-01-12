@@ -3,7 +3,6 @@
 package matrix
 
 import (
-	"fmt"
 	"neuraln/errors"
 )
 
@@ -13,26 +12,11 @@ func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 		return nil, errors.ErrMatricesDimensionsMustMatch
 	}
 
-	a := m.Flatten()
-	b := sMatrix.Flatten()
-
-	// print first 10 elements of a and b
-	if len(a) >= 10 && len(b) >= 10 {
-		fmt.Println("First 10 elements of a and b before CUDA call:")
-		fmt.Println(a[:10])
-		fmt.Println(b[:10])
-	}
-
 	result := New(m.Row, m.Col)
 	for i := 0; i < m.Row; i++ {
 		for j := 0; j < m.Col; j++ {
 			result.Matrix[i][j] = m.Matrix[i][j] + sMatrix.Matrix[i][j]
 		}
-	}
-
-	if len(a) >= 10 && len(b) >= 10 {
-		fmt.Println("First 10 elements of result after CPU call:")
-		fmt.Println(result.Flatten())
 	}
 
 	return result, nil
