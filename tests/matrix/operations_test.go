@@ -33,9 +33,11 @@ func TestMatrixOperations(t *testing.T) {
 		for j := 0; j < 2; j++ {
 			if resultAdd.Matrix[i][j] != expectedAdd[i][j] {
 				t.Errorf("Expected %v, got %v", expectedAdd, resultAdd.Matrix)
+				goto out
 			}
 		}
 	}
+out:
 
 	// Test matrix multiplication
 	c := matrix.New(2, 3)
@@ -65,6 +67,7 @@ func TestMatrixOperations(t *testing.T) {
 		for j := 0; j < 2; j++ {
 			if resultMul.Matrix[i][j] != expectedMul[i][j] {
 				t.Errorf("Expected %v, got %v", expectedMul, resultMul.Matrix)
+				return
 			}
 		}
 	}

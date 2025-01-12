@@ -1,9 +1,5 @@
 package matrix
 
-import (
-	"math/rand/v2"
-)
-
 /*Matrix it works only with float64 type*/
 type Matrix struct {
 	Matrix [][]float64
@@ -36,17 +32,6 @@ func New(Row, Col int) *Matrix {
 		m.Matrix[i] = make([]float64, Col)
 	}
 	return &m
-}
-
-// Randomize fills the Matrix with random values between -1 and 1.
-func (m *Matrix) Randomize() *Matrix {
-	result := New(m.Row, m.Col)
-	for i := 0; i < m.Row; i++ {
-		for j := 0; j < m.Col; j++ {
-			result.Matrix[i][j] = rand.Float64()*(1-(-1)) - 1
-		}
-	}
-	return result
 }
 
 // Map applies a function to each element of the Matrix and returns a new Matrix.

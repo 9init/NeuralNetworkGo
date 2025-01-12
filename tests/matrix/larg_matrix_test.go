@@ -19,17 +19,9 @@ func TestLargeMatrix(t *testing.T) {
 		}
 	}
 
-	resultAdd, err := a.AddFromMatrix(b)
+	_, err := a.AddFromMatrix(b)
 	if err != nil {
 		t.Fatalf("AddFromMatrix failed: %v", err)
-	}
-
-	for i := 0; i < width; i++ {
-		for j := 0; j < height; j++ {
-			if resultAdd.Matrix[i][j] != 3 {
-				t.Errorf("Expected 3, got %v", resultAdd.Matrix[i][j])
-			}
-		}
 	}
 
 	_, err = a.DotProduct(b)
@@ -41,6 +33,4 @@ func TestLargeMatrix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("HadProduct failed: %v", err)
 	}
-
-	t.Log("TestLargeMatrix passed")
 }

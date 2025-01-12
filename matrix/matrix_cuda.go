@@ -142,3 +142,27 @@ func (m *Matrix) HadProduct(sMatrix *Matrix) (*Matrix, error) {
 
 	return result, nil
 }
+
+// Randomize fills the Matrix with random values using CUDA.
+func (m *Matrix) Randomize() *Matrix {
+	result := New(m.Row, m.Col)
+
+	// Flatten matrix
+	a := result.Flatten()
+
+	// Call CUDA wrapper
+	C.cudaMatrixRand(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = a[i*m.Col+j]
+		}
+	}
+
+	return result
+}

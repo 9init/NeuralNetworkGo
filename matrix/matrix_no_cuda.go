@@ -3,6 +3,7 @@
 package matrix
 
 import (
+	"math/rand/v2"
 	"neuraln/errors"
 )
 
@@ -68,4 +69,15 @@ func (m *Matrix) HadProduct(sMatrix *Matrix) (*Matrix, error) {
 		}
 	}
 	return result, nil
+}
+
+// Randomize fills the Matrix with random values between -1 and 1.
+func (m *Matrix) Randomize() *Matrix {
+	result := New(m.Row, m.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = rand.Float64()*(1-(-1)) - 1
+		}
+	}
+	return result
 }

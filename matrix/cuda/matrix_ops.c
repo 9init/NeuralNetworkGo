@@ -6,6 +6,35 @@
 // Define DEBUG flag at compile time (or pass it via the compiler)
 // #define DEBUG
 
+// Wrapper for matrix random initialization
+void cudaMatrixRand(double* A, int rows, int cols) {
+    double *d_A;
+    size_t size = rows * cols * sizeof(double);
+
+    #ifdef DEBUG
+    printf("Allocating memory for matrixRand: size = %zu\n", size);
+    #endif
+
+    // Allocate device memory
+    cudaError_t err = cudaMalloc((void**)&d_A, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_A: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Call CUDA kernel launch wrapper
+    launchMatrixRandomize(d_A, rows, cols);
+
+    // Copy result back to host
+    err = cudaMemcpy(A, d_A, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_A: %s\n", cudaGetErrorString(err));
+    }
+
+    // Free device memory
+    cudaFree(d_A);
+}
+
 // Wrapper for matrix addition
 void cudaMatrixAdd(double* A, double* B, double* C, int rows, int cols) {
     double *d_A, *d_B, *d_C;

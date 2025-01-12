@@ -1,5 +1,21 @@
 #include <cuda_runtime.h>
+#include <curand_kernel.h> // Include cuRAND header
 #include <stdio.h>
+
+// Kernel to initialize cuRAND states
+__global__ void setup_kernel(curandState* state, unsigned long seed) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    curand_init(seed, idx, 0, &state[idx]);
+}
+
+// CUDA kernel for Randomize matrix using cuRAND
+__global__ void matrixRandomize(double* A, int rows, int cols, curandState* states) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < rows * cols) {
+        // Generate random number using cuRAND
+        A[idx] = curand_uniform(&states[idx]);
+    }
+}
 
 // CUDA kernel for matrix addition
 __global__ void matrixAdd(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rows, int cols) {
@@ -63,12 +79,51 @@ __global__ void matrixMul(const double* __restrict__ A, const double* __restrict
     }
 }
 
-// CUDA kernel for matrix hadamard product
+// CUDA kernel for matrix Hadamard product
 __global__ void matrixHadamard(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rows, int cols) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < rows * cols) {
         C[idx] = A[idx] * B[idx];
     }
+}
+
+// Wrapper function for launching matrixRandomize kernel
+extern "C" void launchMatrixRandomize(double* d_A, int rows, int cols) {
+    int threadsPerBlock = 256; // Optimal for most GPUs
+    int numElements = rows * cols;
+    int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
+
+    // Allocate memory for cuRAND states
+    curandState* d_states;
+    cudaMalloc((void**)&d_states, numElements * sizeof(curandState));
+
+    // Initialize cuRAND states
+    setup_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_states, time(0));
+
+    #ifdef DEBUG
+    printf("Launching matrixRandomize kernel: blocksPerGrid = %d, threadsPerBlock = %d, numElements = %d\n",
+           blocksPerGrid, threadsPerBlock, numElements);
+    #endif
+
+    // Launch the kernel
+    matrixRandomize<<<blocksPerGrid, threadsPerBlock>>>(d_A, rows, cols, d_states);
+
+    // Error checking
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Free cuRAND states
+    cudaFree(d_states);
 }
 
 // Wrapper function for launching matrixAdd kernel
