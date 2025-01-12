@@ -2,12 +2,25 @@
 
 package matrix
 
-import "neuraln/errors"
+import (
+	"fmt"
+	"neuraln/errors"
+)
 
 // AddFromMatrixGPU adds another Matrix to the current Matrix using the CPU fallback.
 func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 	if m.Col != sMatrix.Col || m.Row != sMatrix.Row {
 		return nil, errors.ErrMatricesDimensionsMustMatch
+	}
+
+	a := m.Flatten()
+	b := sMatrix.Flatten()
+
+	// print first 10 elements of a and b
+	if len(a) >= 10 && len(b) >= 10 {
+		fmt.Println("First 10 elements of a and b before CUDA call:")
+		fmt.Println(a[:10])
+		fmt.Println(b[:10])
 	}
 
 	result := New(m.Row, m.Col)
@@ -16,6 +29,12 @@ func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 			result.Matrix[i][j] = m.Matrix[i][j] + sMatrix.Matrix[i][j]
 		}
 	}
+
+	if len(a) >= 10 && len(b) >= 10 {
+		fmt.Println("First 10 elements of result after CPU call:")
+		fmt.Println(result.Flatten())
+	}
+
 	return result, nil
 }
 
@@ -33,5 +52,6 @@ func (m *Matrix) DotProduct(sMatrix *Matrix) (*Matrix, error) {
 			}
 		}
 	}
+
 	return result, nil
 }

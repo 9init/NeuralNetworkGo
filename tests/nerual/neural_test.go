@@ -1,4 +1,4 @@
-package neuraln_test
+package neural_test
 
 import (
 	"math"
@@ -31,7 +31,7 @@ func TestTrain(t *testing.T) {
 }
 
 func TestFeedForword(t *testing.T) {
-	nn := neuraln.New(2, 500, 1)
+	nn := neuraln.New(2, 20000, 1)
 
 	inputsData := [][]float64{
 		{1, 0}, {0, 1}, {1, 1}, {0, 0},

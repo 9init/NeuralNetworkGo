@@ -4,12 +4,13 @@ package matrix
 
 /*
 #cgo CFLAGS: -I./cuda
-#cgo LDFLAGS: -L/usr/local/cuda/lib64 -lcudart -L./cuda -lmatrix_ops
+#cgo LDFLAGS: -L./cuda -lmatrix_ops
 #include "cuda/matrix_ops.h"
 */
 import "C"
 
 import (
+	"fmt"
 	"neuraln/errors"
 	"unsafe"
 )
@@ -27,14 +28,22 @@ func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 	b := sMatrix.Flatten()
 	c := make([]float64, len(a))
 
+	// Print input matrices
+	fmt.Println("(AddFromMatrix) elements of a and b before CUDA call:")
+	fmt.Println(a)
+	fmt.Println(b)
+
 	// Call CUDA wrapper
-	C.cudaMatrixAdd(
-		(*C.float)(unsafe.Pointer(&a[0])),
-		(*C.float)(unsafe.Pointer(&b[0])),
-		(*C.float)(unsafe.Pointer(&c[0])),
+	C.launchMatrixAdd(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		(*C.double)(unsafe.Pointer(&c[0])),
 		C.int(m.Row),
 		C.int(m.Col),
 	)
+
+	// Print result matrix in green
+	fmt.Println("\033[32mResult Matrix C :\033[0m", c)
 
 	// Reshape result
 	for i := 0; i < m.Row; i++ {
@@ -59,15 +68,23 @@ func (m *Matrix) DotProduct(sMatrix *Matrix) (*Matrix, error) {
 	b := sMatrix.Flatten()
 	c := make([]float64, m.Row*sMatrix.Col)
 
+	// Print input matrices
+	fmt.Println("(DotProduct) elements of a and b before CUDA call:")
+	fmt.Println(a)
+	fmt.Println(b)
+
 	// Call CUDA wrapper
-	C.cudaMatrixMul(
-		(*C.float)(unsafe.Pointer(&a[0])),
-		(*C.float)(unsafe.Pointer(&b[0])),
-		(*C.float)(unsafe.Pointer(&c[0])),
+	C.launchMatrixMul(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		(*C.double)(unsafe.Pointer(&c[0])),
 		C.int(m.Row),
 		C.int(m.Col),
 		C.int(sMatrix.Col),
 	)
+
+	// Print result matrix in blue
+	fmt.Println("\033[34mResult Matrix C:\033[0m", c)
 
 	// Reshape result
 	for i := 0; i < m.Row; i++ {

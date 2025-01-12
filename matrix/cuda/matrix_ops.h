@@ -6,17 +6,11 @@ extern "C" {
 #endif
 
 // Declare C wrapper functions for CUDA kernels
+void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows, int cols);
+void launchMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA, int colsA, int colsB);
 
-// Wrapper for matrix addition
-void cudaMatrixAdd(float* A, float* B, float* C, int rows, int cols);
-
-// Wrapper for matrix multiplication
-void cudaMatrixMul(float* A, float* B, float* C, int rowsA, int colsA, int colsB);
-
-// Wrapper for element-wise multiplication (Hadamard product)
+// TODO: Implement the following functions
 void cudaMatrixHadamard(float* A, float* B, float* C, int rows, int cols);
-
-// Wrapper for scalar multiplication
 void cudaMatrixScalarMul(float* A, float scalar, float* C, int rows, int cols);
 
 #ifdef __cplusplus

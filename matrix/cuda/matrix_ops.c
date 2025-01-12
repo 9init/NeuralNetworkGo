@@ -1,28 +1,61 @@
 #include "matrix_ops.h"
 #include <cuda_runtime.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 // Wrapper for matrix addition
-void cudaMatrixAdd(float* A, float* B, float* C, int rows, int cols) {
-    float *d_A, *d_B, *d_C;
-    size_t size = rows * cols * sizeof(float);
+void cudaMatrixAdd(double* A, double* B, double* C, int rows, int cols) {
+    double *d_A, *d_B, *d_C;
+    size_t size = rows * cols * sizeof(double);
+
+    printf("Allocating memory for matrixAdd: size = %zu\n", size);
 
     // Allocate device memory
-    cudaMalloc((void**)&d_A, size);
-    cudaMalloc((void**)&d_B, size);
-    cudaMalloc((void**)&d_C, size);
+    cudaError_t err = cudaMalloc((void**)&d_A, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_A: %s\n", cudaGetErrorString(err));
+        return;
+    }
+    err = cudaMalloc((void**)&d_B, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        return;
+    }
+    err = cudaMalloc((void**)&d_C, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_C: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        return;
+    }
 
     // Copy data to device
-    cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, B, size, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_A: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
+    err = cudaMemcpy(d_B, B, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
 
-    // Launch kernel
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
-    matrixAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
+    // Call CUDA kernel launch wrapper
+    launchMatrixAdd(d_A, d_B, d_C, rows, cols);
 
     // Copy result back to host
-    cudaMemcpy(C, d_C, size, cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(C, d_C, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_C: %s\n", cudaGetErrorString(err));
+    }
 
     // Free device memory
     cudaFree(d_A);
@@ -31,29 +64,60 @@ void cudaMatrixAdd(float* A, float* B, float* C, int rows, int cols) {
 }
 
 // Wrapper for matrix multiplication
-void cudaMatrixMul(float* A, float* B, float* C, int rowsA, int colsA, int colsB) {
-    float *d_A, *d_B, *d_C;
-    size_t sizeA = rowsA * colsA * sizeof(float);
-    size_t sizeB = colsA * colsB * sizeof(float);
-    size_t sizeC = rowsA * colsB * sizeof(float);
+void cudaMatrixMul(double* A, double* B, double* C, int rowsA, int colsA, int colsB) {
+    double *d_A, *d_B, *d_C;
+    size_t sizeA = rowsA * colsA * sizeof(double);
+    size_t sizeB = colsA * colsB * sizeof(double);
+    size_t sizeC = rowsA * colsB * sizeof(double);
+
+    printf("Allocating memory for matrixMul: sizeA = %zu, sizeB = %zu, sizeC = %zu\n", sizeA, sizeB, sizeC);
 
     // Allocate device memory
-    cudaMalloc((void**)&d_A, sizeA);
-    cudaMalloc((void**)&d_B, sizeB);
-    cudaMalloc((void**)&d_C, sizeC);
+    cudaError_t err = cudaMalloc((void**)&d_A, sizeA);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_A: %s\n", cudaGetErrorString(err));
+        return;
+    }
+    err = cudaMalloc((void**)&d_B, sizeB);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        return;
+    }
+    err = cudaMalloc((void**)&d_C, sizeC);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_C: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        return;
+    }
 
     // Copy data to device
-    cudaMemcpy(d_A, A, sizeA, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, B, sizeB, cudaMemcpyHostToDevice);
+    err = cudaMemcpy(d_A, A, sizeA, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_A: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
+    err = cudaMemcpy(d_B, B, sizeB, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
 
-    // Launch kernel
-    dim3 threadsPerBlock(16, 16);
-    dim3 blocksPerGrid((colsB + threadsPerBlock.x - 1) / threadsPerBlock.x,
-                       (rowsA + threadsPerBlock.y - 1) / threadsPerBlock.y);
-    matrixMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rowsA, colsA, colsB);
+    // Call CUDA kernel launch wrapper
+    launchMatrixMul(d_A, d_B, d_C, rowsA, colsA, colsB);
 
     // Copy result back to host
-    cudaMemcpy(C, d_C, sizeC, cudaMemcpyDeviceToHost);
+    err = cudaMemcpy(C, d_C, sizeC, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_C: %s\n", cudaGetErrorString(err));
+    }
 
     // Free device memory
     cudaFree(d_A);
