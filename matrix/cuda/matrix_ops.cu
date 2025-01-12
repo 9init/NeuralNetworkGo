@@ -13,7 +13,7 @@ __global__ void matrixRandomize(double* A, int rows, int cols, curandState* stat
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < rows * cols) {
         // Generate random number using cuRAND
-        A[idx] = curand_uniform(&states[idx]);
+        A[idx] = 2.0 * curand_uniform(&states[idx]) - 1.0; // [-1, 1]
     }
 }
 

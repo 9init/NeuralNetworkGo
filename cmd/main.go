@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	nn := neuraln.New(2, 10, 1)
+	nn := neuraln.New(2, 5000, 1)
 
 	inputsData := [][]float64{
 		{1, 0}, {0, 1}, {1, 1}, {0, 0},
@@ -17,7 +17,7 @@ func main() {
 		{1}, {1}, {0}, {0},
 	}
 
-	err := nn.Train(inputsData, outputsData, 1)
+	err := nn.Train(inputsData, outputsData, 20)
 	if err != nil {
 		fmt.Printf("TestFeedForword failed: %v\n", err)
 		return
