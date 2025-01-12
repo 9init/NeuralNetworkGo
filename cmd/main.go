@@ -7,30 +7,30 @@ import (
 )
 
 func main() {
-	nn := neuraln.New(2, 10, 1)
+	nn := neuraln.New(2, 10000, 1)
 
-	// inputsData := [][]float64{
-	// 	{1, 0}, {0, 1}, {1, 1}, {0, 0},
-	// }
+	inputsData := [][]float64{
+		{1, 0}, {0, 1}, {1, 1}, {0, 0},
+	}
 
-	// outputsData := [][]float64{
-	// 	{1}, {1}, {0}, {0},
-	// }
+	outputsData := [][]float64{
+		{1}, {1}, {0}, {0},
+	}
 
-	// err := nn.Train(inputsData, outputsData, 1)
-	// if err != nil {
-	// 	fmt.Printf("TestFeedForword failed: %v\n", err)
-	// 	return
-	// }
+	err := nn.Train(inputsData, outputsData, 100)
+	if err != nil {
+		fmt.Printf("TestFeedForword failed: %v\n", err)
+		return
+	}
 
 	// clear all last prints
 	fmt.Print("\n")
 
 	testingData := [][][]float64{
 		{{1, 0}, {1}},
-		// {{0, 1}, {1}},
-		// {{1, 1}, {0}},
-		// {{0, 0}, {0}},
+		{{0, 1}, {1}},
+		{{1, 1}, {0}},
+		{{0, 0}, {0}},
 	}
 
 	for _, data := range testingData {
