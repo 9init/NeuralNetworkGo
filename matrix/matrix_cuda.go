@@ -192,3 +192,30 @@ func (m *Matrix) Transpose() *Matrix {
 
 	return result
 }
+
+// ScalerMul multiplies the Matrix by a scalar value using CUDA.
+func (m *Matrix) ScalerMul(n float64) *Matrix {
+	result := New(m.Row, m.Col)
+
+	// Flatten matrix
+	a := m.Flatten()
+	b := make([]float64, len(a))
+
+	// Call CUDA wrapper
+	C.cudaMatrixScalarMul(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		C.double(n),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = b[i*m.Col+j]
+		}
+	}
+
+	return result
+}

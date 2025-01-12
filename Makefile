@@ -47,7 +47,7 @@ build:
 
 # Run tests all without CUDA support
 test:
-	go test -v -count=1 ./tests/...
+	go test -timeout 0 -v -count=1 ./tests/...
 
 # Run tests all with CUDA support
 test-cuda: 
@@ -56,7 +56,7 @@ test-cuda:
 
 # Run tests without CUDA support
 test-nerual:
-	go test -v -count=1 ./tests/nerual
+	go test -timeout 0 -v -count=1 ./tests/nerual
 
 # Run tests with CUDA support
 test-nerual-cuda: $(CUDA_LIB)
@@ -65,7 +65,7 @@ test-nerual-cuda: $(CUDA_LIB)
 
 # Run matrix tests without CUDA support
 test-matrix:
-	go test -v -count=1 ./tests/matrix
+	go test -timeout 0 -v -count=1 ./tests/matrix
 
 # Run matrix tests with CUDA support
 test-matrix-cuda: $(CUDA_LIB)

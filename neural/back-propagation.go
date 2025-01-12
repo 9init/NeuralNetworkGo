@@ -50,7 +50,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	if err != nil {
 		return err
 	}
-	outputGradients = outputGradients.Multiply(neural.LearningRate)
+	outputGradients = outputGradients.ScalerMul(neural.LearningRate)
 
 	// Calculate delta for weights between hidden and output layers
 	hiddenTransposed := hidden.Transpose()
@@ -82,7 +82,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	if err != nil {
 		return err
 	}
-	hiddenGradients = hiddenGradients.Multiply(neural.LearningRate)
+	hiddenGradients = hiddenGradients.ScalerMul(neural.LearningRate)
 
 	// Calculate delta for weights between input and hidden layers
 	inputsTransposed := inputs.Transpose()

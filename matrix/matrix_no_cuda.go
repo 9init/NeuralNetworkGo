@@ -92,3 +92,14 @@ func (m *Matrix) Transpose() *Matrix {
 	}
 	return result
 }
+
+// ScalerMul multiplies each element of the Matrix by a scalar and returns a new Matrix.
+func (m *Matrix) ScalerMul(n float64) *Matrix {
+	result := New(m.Row, m.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = m.Matrix[i][j] * n
+		}
+	}
+	return result
+}

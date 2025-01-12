@@ -97,6 +97,13 @@ __global__ void matrixTranspose(const double* __restrict__ A, double* __restrict
     }
 }
 
+// CUDA kernel for scaler multiplication
+__global__ void matrixScalarMul(double* A, double* B, int rows, int cols, double scalar) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < rows * cols) {
+        B[idx] = A[idx] * scalar;
+    }
+}
 
 /* Wrapper functions for launching CUDA kernels */
 
@@ -261,6 +268,33 @@ extern "C" void launchMatrixTranspose(double* d_A, double* d_B, int rows, int co
 
     // Launch the kernel
     matrixTranspose<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, rows, cols);
+
+    // Check for kernel launch errors
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixScalarMul kernel
+extern "C" void launchMatrixScalarMul(double* d_A, double* d_B, int rows, int cols, double scalar) {
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
+
+    #ifdef DEBUG
+    printf("Launching matrixScalarMul kernel: blocksPerGrid = %d, threadsPerBlock = %d\n", blocksPerGrid, threadsPerBlock);
+    #endif
+
+    // Launch the kernel
+    matrixScalarMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, rows, cols, scalar);
 
     // Check for kernel launch errors
     cudaError_t err = cudaGetLastError();

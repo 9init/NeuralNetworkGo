@@ -12,12 +12,8 @@ void cudaMatrixSub(double* d_A, double* d_B, double* d_C, int rows, int cols);
 void cudaMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA, int colsA, int colsB);
 void cudaMatrixHadamard(double* A, double* B, double* C, int rows, int cols);
 void cudaMatrixTranspose(double* A, double* C, int rows, int cols);
+void cudaMatrixScalarMul(double* A,  double* C, double scalar, int rows, int cols);
 
-// TODO: Implement the following functions
-void cudaMatrixScalarMul(double* A, double scalar, double* C, int rows, int cols);
-
-// Declare function to set debug flag
-void setDebugFlag(int flag);
 
 #ifdef __cplusplus
 }

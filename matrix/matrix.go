@@ -45,17 +45,6 @@ func (m *Matrix) Map(f func(float64) float64) *Matrix {
 	return result
 }
 
-// Multiply multiplies each element of the Matrix by a scalar and returns a new Matrix.
-func (m *Matrix) Multiply(n float64) *Matrix {
-	result := New(m.Row, m.Col)
-	for i := 0; i < m.Row; i++ {
-		for j := 0; j < m.Col; j++ {
-			result.Matrix[i][j] = m.Matrix[i][j] * n
-		}
-	}
-	return result
-}
-
 // Flatten converts the Matrix into a 1D slice.
 func (m *Matrix) Flatten() []float64 {
 	flat := make([]float64, m.Row*m.Col)
