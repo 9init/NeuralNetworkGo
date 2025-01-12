@@ -132,3 +132,65 @@ void cudaMatrixMul(double* A, double* B, double* C, int rowsA, int colsA, int co
     cudaFree(d_B);
     cudaFree(d_C);
 }
+
+// Wrapper for element-wise matrix multiplication (Hadamard product)
+void cudaMatrixHadamard(double* A, double* B, double* C, int rows, int cols) {
+    double *d_A, *d_B, *d_C;
+    size_t size = rows * cols * sizeof(double);
+
+    #ifdef DEBUG
+    printf("Allocating memory for matrixHadamard: size = %zu\n", size);
+    #endif
+
+    // Allocate device memory
+    cudaError_t err = cudaMalloc((void**)&d_A, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_A: %s\n", cudaGetErrorString(err));
+        return;
+    }
+    err = cudaMalloc((void**)&d_B, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        return;
+    }
+    err = cudaMalloc((void**)&d_C, size);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_C: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        return;
+    }
+
+    // Copy data to device
+    err = cudaMemcpy(d_A, A, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_A: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
+    err = cudaMemcpy(d_B, B, size, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_B: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_B);
+        cudaFree(d_C);
+        return;
+    }
+
+    // Call CUDA kernel launch wrapper
+    launchMatrixHadamard(d_A, d_B, d_C, rows, cols);
+
+    // Copy result back to host
+    err = cudaMemcpy(C, d_C, size, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_C: %s\n", cudaGetErrorString(err));
+    }
+
+    // Free device memory
+    cudaFree(d_A);
+    cudaFree(d_B);
+    cudaFree(d_C);
+}

@@ -23,6 +23,14 @@ __global__ void matrixMul(double* A, double* B, double* C, int rowsA, int colsA,
     }
 }
 
+// CUDA kernel for matrix hadamard product
+__global__ void matrixHadamard(double* A, double* B, double* C, int rows, int cols) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < rows * cols) {
+        C[idx] = A[idx] * B[idx];
+    }
+}
+
 // Wrapper function for launching matrixAdd kernel
 extern "C" void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows, int cols) {
     int threadsPerBlock = 256;
@@ -63,6 +71,33 @@ extern "C" void launchMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA
     
     // Launch the kernel
     matrixMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rowsA, colsA, colsB);
+
+    // Check for kernel launch errors
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixHadamard kernel
+extern "C" void launchMatrixHadamard(double* d_A, double* d_B, double* d_C, int rows, int cols) {
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
+
+    #ifdef DEBUG
+    printf("Launching matrixHadamard kernel: blocksPerGrid = %d, threadsPerBlock = %d\n", blocksPerGrid, threadsPerBlock);
+    #endif
+
+    // Launch the kernel
+    matrixHadamard<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
 
     // Check for kernel launch errors
     cudaError_t err = cudaGetLastError();

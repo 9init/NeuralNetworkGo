@@ -45,12 +45,21 @@ run: build
 build:
 	go build -o cmd/bin/main cmd/main.go
 
-# Run tests without CUDA support
+# Run tests all without CUDA support
 test:
+	go test -v -count=1 ./tests/...
+
+# Run tests all with CUDA support
+test-cuda: 
+	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
+	go test -v -count=1 -tags $(GO_TAGS) ./tests/...
+
+# Run tests without CUDA support
+test-nerual:
 	go test -v -count=1 ./tests/nerual
 
 # Run tests with CUDA support
-test-cuda: $(CUDA_LIB)
+test-nerual-cuda: $(CUDA_LIB)
 	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
 	go test -count=1 -tags $(GO_TAGS) ./tests/nerual
 
@@ -68,4 +77,4 @@ clean:
 	rm -f $(CUDA_LIB) cmd/bin/main
 
 # Phony targets
-.PHONY: all build build-cuda run run-cuda test test-cuda clean test-matrix test-matrix-cuda
+.PHONY: all build build-cuda run run-cuda test test-cuda clean test-matrix test-matrix-cuda test-nerual test-nerual-cuda

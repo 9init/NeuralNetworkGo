@@ -78,3 +78,35 @@ func (m *Matrix) DotProduct(sMatrix *Matrix) (*Matrix, error) {
 
 	return result, nil
 }
+
+// HadProduct performs element-wise multiplication (Hadamard product) using CUDA.
+func (m *Matrix) HadProduct(sMatrix *Matrix) (*Matrix, error) {
+	if m.Row != sMatrix.Row || m.Col != sMatrix.Col {
+		return nil, errors.ErrRowsColsMustEqual
+	}
+
+	result := New(m.Row, m.Col)
+
+	// Flatten matrices
+	a := m.Flatten()
+	b := sMatrix.Flatten()
+	c := make([]float64, len(a))
+
+	// Call CUDA wrapper
+	C.cudaMatrixHadamard(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		(*C.double)(unsafe.Pointer(&c[0])),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = c[i*m.Col+j]
+		}
+	}
+
+	return result, nil
+}

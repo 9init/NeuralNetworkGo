@@ -76,21 +76,6 @@ func (m *Matrix) Map(f func(float64) float64) *Matrix {
 	return result
 }
 
-// HadProduct performs element-wise multiplication (Hadamard product) and returns a new Matrix.
-func (m *Matrix) HadProduct(sMatrix *Matrix) (*Matrix, error) {
-	if m.Row != sMatrix.Row || m.Col != sMatrix.Col {
-		return nil, errors.ErrRowsColsMustEqual
-	}
-
-	result := New(m.Row, m.Col)
-	for i := 0; i < m.Row; i++ {
-		for j := 0; j < m.Col; j++ {
-			result.Matrix[i][j] = m.Matrix[i][j] * sMatrix.Matrix[i][j]
-		}
-	}
-	return result, nil
-}
-
 // Multiply multiplies each element of the Matrix by a scalar and returns a new Matrix.
 func (m *Matrix) Multiply(n float64) *Matrix {
 	result := New(m.Row, m.Col)
