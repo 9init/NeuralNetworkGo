@@ -81,3 +81,14 @@ func (m *Matrix) Randomize() *Matrix {
 	}
 	return result
 }
+
+// Transpose returns the transpose of the Matrix.
+func (m *Matrix) Transpose() *Matrix {
+	result := New(m.Col, m.Row)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[j][i] = m.Matrix[i][j]
+		}
+	}
+	return result
+}

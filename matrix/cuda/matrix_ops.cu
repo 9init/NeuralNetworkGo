@@ -87,6 +87,20 @@ __global__ void matrixHadamard(const double* __restrict__ A, const double* __res
     }
 }
 
+// CUDA kernel for transposing a matrix
+__global__ void matrixTranspose(const double* __restrict__ A, double* __restrict__ B, int rows, int cols) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < rows * cols) {
+        int i = idx / cols;
+        int j = idx % cols;
+        B[j * rows + i] = A[i * cols + j];
+    }
+}
+
+
+/* Wrapper functions for launching CUDA kernels */
+
+
 // Wrapper function for launching matrixRandomize kernel
 extern "C" void launchMatrixRandomize(double* d_A, int rows, int cols) {
     int threadsPerBlock = 256; // Optimal for most GPUs
@@ -220,6 +234,33 @@ extern "C" void launchMatrixHadamard(double* d_A, double* d_B, double* d_C, int 
 
     // Launch the kernel
     matrixHadamard<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
+
+    // Check for kernel launch errors
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixTranspose kernel
+extern "C" void launchMatrixTranspose(double* d_A, double* d_B, int rows, int cols) {
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
+
+    #ifdef DEBUG
+    printf("Launching matrixTranspose kernel: blocksPerGrid = %d, threadsPerBlock = %d\n", blocksPerGrid, threadsPerBlock);
+    #endif
+
+    // Launch the kernel
+    matrixTranspose<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, rows, cols);
 
     // Check for kernel launch errors
     cudaError_t err = cudaGetLastError();

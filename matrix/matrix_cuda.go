@@ -166,3 +166,29 @@ func (m *Matrix) Randomize() *Matrix {
 
 	return result
 }
+
+// Transpose returns the transpose of the Matrix using CUDA.
+func (m *Matrix) Transpose() *Matrix {
+	result := New(m.Col, m.Row)
+
+	// Flatten matrices
+	a := m.Flatten()
+	b := make([]float64, len(a))
+
+	// Call CUDA wrapper
+	C.cudaMatrixTranspose(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Col; i++ {
+		for j := 0; j < m.Row; j++ {
+			result.Matrix[i][j] = b[i*m.Row+j]
+		}
+	}
+
+	return result
+}

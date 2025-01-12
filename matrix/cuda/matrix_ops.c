@@ -284,3 +284,49 @@ void cudaMatrixHadamard(double* A, double* B, double* C, int rows, int cols) {
     cudaFree(d_B);
     cudaFree(d_C);
 }
+
+// wrapper for transpose matrix
+void cudaMatrixTranspose(double* A, double* C, int rows, int cols) {
+    double *d_A, *d_C;
+    size_t sizeA = rows * cols * sizeof(double);
+    size_t sizeC = cols * rows * sizeof(double);
+
+    #ifdef DEBUG
+    printf("Allocating memory for matrixTranspose: sizeA = %zu, sizeC = %zu\n", sizeA, sizeC);
+    #endif
+
+    // Allocate device memory
+    cudaError_t err = cudaMalloc((void**)&d_A, sizeA);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_A: %s\n", cudaGetErrorString(err));
+        return;
+    }
+    err = cudaMalloc((void**)&d_C, sizeC);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMalloc failed for d_C: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        return;
+    }
+
+    // Copy data to device
+    err = cudaMemcpy(d_A, A, sizeA, cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_A: %s\n", cudaGetErrorString(err));
+        cudaFree(d_A);
+        cudaFree(d_C);
+        return;
+    }
+
+    // Call CUDA kernel launch wrapper
+    launchMatrixTranspose(d_A, d_C, rows, cols);
+
+    // Copy result back to host
+    err = cudaMemcpy(C, d_C, sizeC, cudaMemcpyDeviceToHost);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "cudaMemcpy failed for d_C: %s\n", cudaGetErrorString(err));
+    }
+
+    // Free device memory
+    cudaFree(d_A);
+    cudaFree(d_C);
+}
