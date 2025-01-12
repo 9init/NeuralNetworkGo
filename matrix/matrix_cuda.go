@@ -28,7 +28,7 @@ func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 	c := make([]float64, len(a))
 
 	// Call CUDA wrapper
-	C.launchMatrixAdd(
+	C.cudaMatrixAdd(
 		(*C.double)(unsafe.Pointer(&a[0])),
 		(*C.double)(unsafe.Pointer(&b[0])),
 		(*C.double)(unsafe.Pointer(&c[0])),
@@ -60,7 +60,7 @@ func (m *Matrix) DotProduct(sMatrix *Matrix) (*Matrix, error) {
 	c := make([]float64, m.Row*sMatrix.Col)
 
 	// Call CUDA wrapper
-	C.launchMatrixMul(
+	C.cudaMatrixMul(
 		(*C.double)(unsafe.Pointer(&a[0])),
 		(*C.double)(unsafe.Pointer(&b[0])),
 		(*C.double)(unsafe.Pointer(&c[0])),
