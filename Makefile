@@ -7,12 +7,25 @@ CUDA_LIB := $(ROOT_DIR)/matrix/cuda/libmatrix_ops.so
 GO_SRC := $(wildcard matrix/*.go)
 GO_TAGS := cuda
 
-# Default target
-all: build
+# Debug flag (set to 1 to enable debug prints)
+DEBUG ?= 0
+
+# Compiler flags
+CFLAGS := -I./cuda
+NVCCFLAGS := -shared -Xcompiler -fPIC
+
+# Add debug flag if enabled
+ifeq ($(DEBUG), 1)
+    CFLAGS += -DDEBUG
+    NVCCFLAGS += -DDEBUG
+endif
 
 # Compile CUDA and C code into a shared library
 $(CUDA_LIB): $(CUDA_SRC) $(C_SRC)
-	nvcc -o $(CUDA_LIB) -shared -Xcompiler -fPIC $(CUDA_SRC) $(C_SRC)
+	nvcc $(NVCCFLAGS) -o $(CUDA_LIB) $(CUDA_SRC) $(C_SRC)
+
+# Default target
+all: build
 
 # Build Go code with CUDA support
 build-cuda: $(CUDA_LIB)

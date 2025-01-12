@@ -3,12 +3,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// Define DEBUG flag at compile time (or pass it via the compiler)
+// #define DEBUG
+
 // Wrapper for matrix addition
 void cudaMatrixAdd(double* A, double* B, double* C, int rows, int cols) {
     double *d_A, *d_B, *d_C;
     size_t size = rows * cols * sizeof(double);
 
+    #ifdef DEBUG
     printf("Allocating memory for matrixAdd: size = %zu\n", size);
+    #endif
 
     // Allocate device memory
     cudaError_t err = cudaMalloc((void**)&d_A, size);
@@ -70,7 +75,10 @@ void cudaMatrixMul(double* A, double* B, double* C, int rowsA, int colsA, int co
     size_t sizeB = colsA * colsB * sizeof(double);
     size_t sizeC = rowsA * colsB * sizeof(double);
 
+
+    #ifdef DEBUG
     printf("Allocating memory for matrixMul: sizeA = %zu, sizeB = %zu, sizeC = %zu\n", sizeA, sizeB, sizeC);
+    #endif
 
     // Allocate device memory
     cudaError_t err = cudaMalloc((void**)&d_A, sizeA);

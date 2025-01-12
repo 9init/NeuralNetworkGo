@@ -28,7 +28,9 @@ extern "C" void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows,
     int threadsPerBlock = 256;
     int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
 
+    #ifdef DEBUG
     printf("Launching matrixAdd kernel: blocksPerGrid = %d, threadsPerBlock = %d\n", blocksPerGrid, threadsPerBlock);
+    #endif
 
     // Launch the kernel
     matrixAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
@@ -54,9 +56,11 @@ extern "C" void launchMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA
     dim3 blocksPerGrid((colsB + threadsPerBlock.x - 1) / threadsPerBlock.x,
                        (rowsA + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
+    #ifdef DEBUG
     printf("Launching matrixMul kernel: blocksPerGrid = (%d, %d), threadsPerBlock = (%d, %d)\n",
            blocksPerGrid.x, blocksPerGrid.y, threadsPerBlock.x, threadsPerBlock.y);
-
+    #endif
+    
     // Launch the kernel
     matrixMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rowsA, colsA, colsB);
 
