@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	nn := neuraln.New(2, 10000, 1)
+	nn := neuraln.New(2, 50000, 1)
 
 	inputsData := [][]float64{
 		{1, 0}, {0, 1}, {1, 1}, {0, 0},

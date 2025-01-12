@@ -2,29 +2,69 @@
 #include <stdio.h>
 
 // CUDA kernel for matrix addition
-__global__ void matrixAdd(double* A, double* B, double* C, int rows, int cols) {
+__global__ void matrixAdd(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rows, int cols) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < rows * cols) {
         C[idx] = A[idx] + B[idx];
     }
 }
 
-// CUDA kernel for matrix multiplication
-__global__ void matrixMul(double* A, double* B, double* C, int rowsA, int colsA, int colsB) {
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
+// CUDA kernel for matrix subtraction
+__global__ void matrixSub(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rows, int cols) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < rows * cols) {
+        C[idx] = A[idx] - B[idx];
+    }
+}
 
-    if (row < rowsA && col < colsB) {
-        double sum = 0.0;
-        for (int k = 0; k < colsA; k++) {
-            sum += A[row * colsA + k] * B[k * colsB + col];
+// CUDA kernel for matrix multiplication
+__global__ void matrixMul(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rowsA, int colsA, int colsB) {
+    // Tile size
+    const int TILE_SIZE = 16;
+
+    // Shared memory for tiles of A and B
+    __shared__ double sharedA[TILE_SIZE][TILE_SIZE];
+    __shared__ double sharedB[TILE_SIZE][TILE_SIZE];
+
+    // Thread indices
+    int row = blockIdx.y * TILE_SIZE + threadIdx.y;
+    int col = blockIdx.x * TILE_SIZE + threadIdx.x;
+
+    double sum = 0.0;
+
+    // Loop over tiles
+    for (int t = 0; t < (colsA + TILE_SIZE - 1) / TILE_SIZE; t++) {
+        // Load tiles into shared memory
+        if (row < rowsA && t * TILE_SIZE + threadIdx.x < colsA) {
+            sharedA[threadIdx.y][threadIdx.x] = A[row * colsA + t * TILE_SIZE + threadIdx.x];
+        } else {
+            sharedA[threadIdx.y][threadIdx.x] = 0.0;
         }
+
+        if (col < colsB && t * TILE_SIZE + threadIdx.y < colsA) {
+            sharedB[threadIdx.y][threadIdx.x] = B[(t * TILE_SIZE + threadIdx.y) * colsB + col];
+        } else {
+            sharedB[threadIdx.y][threadIdx.x] = 0.0;
+        }
+
+        __syncthreads(); // Synchronize to ensure all threads have loaded their tiles
+
+        // Compute partial sum for the tile
+        for (int k = 0; k < TILE_SIZE; k++) {
+            sum += sharedA[threadIdx.y][k] * sharedB[k][threadIdx.x];
+        }
+
+        __syncthreads(); // Synchronize before loading the next tile
+    }
+
+    // Write the result to global memory
+    if (row < rowsA && col < colsB) {
         C[row * colsB + col] = sum;
     }
 }
 
 // CUDA kernel for matrix hadamard product
-__global__ void matrixHadamard(double* A, double* B, double* C, int rows, int cols) {
+__global__ void matrixHadamard(const double* __restrict__ A, const double* __restrict__ B, double* __restrict__ C, int rows, int cols) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < rows * cols) {
         C[idx] = A[idx] * B[idx];
@@ -33,7 +73,7 @@ __global__ void matrixHadamard(double* A, double* B, double* C, int rows, int co
 
 // Wrapper function for launching matrixAdd kernel
 extern "C" void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows, int cols) {
-    int threadsPerBlock = 256;
+    int threadsPerBlock = 256; // Optimal for most GPUs
     int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
 
     #ifdef DEBUG
@@ -42,6 +82,33 @@ extern "C" void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows,
 
     // Launch the kernel
     matrixAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
+
+    // Error checking
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixSub kernel
+extern "C" void launchMatrixSub(double* d_A, double* d_B, double* d_C, int rows, int cols) {
+    int threadsPerBlock = 256; // Optimal for most GPUs
+    int blocksPerGrid = (rows * cols + threadsPerBlock - 1) / threadsPerBlock;
+
+    #ifdef DEBUG
+    printf("Launching matrixSub kernel: blocksPerGrid = %d, threadsPerBlock = %d\n", blocksPerGrid, threadsPerBlock);
+    #endif
+
+    // Launch the kernel
+    matrixSub<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, rows, cols);
 
     // Check for kernel launch errors
     cudaError_t err = cudaGetLastError();
@@ -60,7 +127,7 @@ extern "C" void launchMatrixAdd(double* d_A, double* d_B, double* d_C, int rows,
 
 // Wrapper function for launching matrixMul kernel
 extern "C" void launchMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA, int colsA, int colsB) {
-    dim3 threadsPerBlock(16, 16);
+    dim3 threadsPerBlock(16, 16); // Optimal for shared memory tiles
     dim3 blocksPerGrid((colsB + threadsPerBlock.x - 1) / threadsPerBlock.x,
                        (rowsA + threadsPerBlock.y - 1) / threadsPerBlock.y);
 

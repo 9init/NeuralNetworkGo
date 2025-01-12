@@ -2,7 +2,6 @@ package matrix
 
 import (
 	"math/rand/v2"
-	"neuraln/errors"
 )
 
 /*Matrix it works only with float64 type*/
@@ -48,21 +47,6 @@ func (m *Matrix) Randomize() *Matrix {
 		}
 	}
 	return result
-}
-
-// SubtractMatrix subtracts another Matrix from the current Matrix and returns a new Matrix.
-func (m *Matrix) SubtractMatrix(sMatrix *Matrix) (*Matrix, error) {
-	if m.Col != sMatrix.Col || m.Row != sMatrix.Row {
-		return nil, errors.ErrMatricesDimensionsMustMatch
-	}
-
-	result := New(m.Row, m.Col)
-	for i := 0; i < m.Row; i++ {
-		for j := 0; j < m.Col; j++ {
-			result.Matrix[i][j] = m.Matrix[i][j] - sMatrix.Matrix[i][j]
-		}
-	}
-	return result, nil
 }
 
 // Map applies a function to each element of the Matrix and returns a new Matrix.

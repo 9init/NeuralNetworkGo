@@ -22,6 +22,21 @@ func (m *Matrix) AddFromMatrix(sMatrix *Matrix) (*Matrix, error) {
 	return result, nil
 }
 
+// SubtractMatrix subtracts another Matrix from the current Matrix using the CPU fallback.
+func (m *Matrix) SubtractMatrix(sMatrix *Matrix) (*Matrix, error) {
+	if m.Col != sMatrix.Col || m.Row != sMatrix.Row {
+		return nil, errors.ErrMatricesDimensionsMustMatch
+	}
+
+	result := New(m.Row, m.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = m.Matrix[i][j] - sMatrix.Matrix[i][j]
+		}
+	}
+	return result, nil
+}
+
 // DotProductGPU performs matrix multiplication using the CPU fallback.
 func (m *Matrix) DotProduct(sMatrix *Matrix) (*Matrix, error) {
 	if m.Col != sMatrix.Row {
