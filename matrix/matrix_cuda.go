@@ -3,8 +3,7 @@
 package matrix
 
 /*
-#cgo CFLAGS: -I./cuda
-#cgo LDFLAGS: -L./cuda -lmatrix_ops
+#cgo LDFLAGS: -L../build/lib -lmatrix_ops
 #include "cuda/matrix_ops.h"
 */
 import "C"
