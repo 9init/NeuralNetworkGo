@@ -26,8 +26,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	if err != nil {
 		return err
 	}
-	hidden = hidden.Map(sigmoid)
-
+	hidden = hidden.Sigmoid()
 	outputs, err := neural.WeightHO.DotProduct(hidden)
 	if err != nil {
 		return err
@@ -36,7 +35,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	if err != nil {
 		return err
 	}
-	outputs = outputs.Map(sigmoid)
+	outputs = outputs.Sigmoid()
 
 	// Calculate output errors
 	outputErrors, err := targets.SubtractMatrix(outputs)
@@ -45,7 +44,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	}
 
 	// Calculate output gradient
-	outputGradients := outputs.Map(dsigmoid)
+	outputGradients := outputs.DSigmoid()
 	outputGradients, err = outputGradients.HadProduct(outputErrors)
 	if err != nil {
 		return err
@@ -77,7 +76,7 @@ func (neural *Neural) backPropagate(inputs *matrix.Matrix, targets *matrix.Matri
 	}
 
 	// Calculate hidden gradient
-	hiddenGradients := hidden.Map(dsigmoid)
+	hiddenGradients := hidden.DSigmoid()
 	hiddenGradients, err = hiddenGradients.HadProduct(hiddenErrors)
 	if err != nil {
 		return err

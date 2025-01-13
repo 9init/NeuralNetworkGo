@@ -105,6 +105,23 @@ __global__ void matrixScalarMul(double* A, double* B, int rows, int cols, double
     }
 }
 
+// CUDA kernel for element-wise sigmoid activation function
+__global__ void matrixSigmoid(double* A, double* C, int rows, int cols) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x; // Global thread index
+    if (idx < rows * cols) { // Ensure the index is within bounds
+        // Apply sigmoid function
+        C[idx] = 1.0 / (1.0 + exp(-A[idx]));
+    }
+}
+
+// CUDA kernel for element-wise Derivative of sigmoid activation function
+__global__ void matrixDSigmoid(double* A, double* C, int rows, int cols) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x; // Global thread index
+    if (idx < rows * cols) { // Ensure the index is within bounds
+        C[idx] = A[idx] * (1.0 - A[idx]);
+    }
+}
+
 /* Wrapper functions for launching CUDA kernels */
 
 
@@ -297,6 +314,64 @@ extern "C" void launchMatrixScalarMul(double* d_A, double* d_B, int rows, int co
     matrixScalarMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, rows, cols, scalar);
 
     // Check for kernel launch errors
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixSigmoid kernel
+extern "C" void launchMatrixSigmoid(double* d_A, double* d_C, int rows, int cols) {
+    int threadsPerBlock = 256; // Optimal for most GPUs
+    int numElements = rows * cols; // Total number of elements in the matrix
+    int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock; // Ensure all elements are covered
+
+    #ifdef DEBUG
+    printf("Launching matrixSigmoid kernel: blocksPerGrid = %d, threadsPerBlock = %d, numElements = %d\n",
+           blocksPerGrid, threadsPerBlock, numElements);
+    #endif
+
+    // Launch the kernel
+    matrixSigmoid<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_C, rows, cols);
+
+    // Error checking
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+
+    // Synchronize to ensure the kernel completes
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Kernel execution failed: %s\n", cudaGetErrorString(err));
+        return;
+    }
+}
+
+// Wrapper function for launching matrixSigmoidDerivative kernel
+extern "C" void launchMatrixDSigmoid(double* d_A, double* d_C, int rows, int cols) {
+    int threadsPerBlock = 256; // Optimal for most GPUs
+    int numElements = rows * cols; // Total number of elements in the matrix
+    int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock; // Ensure all elements are covered
+
+    #ifdef DEBUG
+    printf("Launching matrixDSigmoid kernel: blocksPerGrid = %d, threadsPerBlock = %d, numElements = %d\n",
+           blocksPerGrid, threadsPerBlock, numElements);
+    #endif
+
+    // Launch the kernel
+    matrixDSigmoid<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_C, rows, cols);
+
+    // Error checking
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         fprintf(stderr, "Kernel launch failed: %s\n", cudaGetErrorString(err));

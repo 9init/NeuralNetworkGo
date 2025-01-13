@@ -219,3 +219,55 @@ func (m *Matrix) ScalerMul(n float64) *Matrix {
 
 	return result
 }
+
+// Sigmoid applies the sigmoid function to the Matrix using CUDA.
+func (m *Matrix) Sigmoid() *Matrix {
+	result := New(m.Row, m.Col)
+
+	// Flatten matrix
+	a := m.Flatten()
+	b := make([]float64, len(a))
+
+	// Call CUDA wrapper
+	C.cudaMatrixSigmoid(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = b[i*m.Col+j]
+		}
+	}
+
+	return result
+}
+
+// DSigmoid applies the derivative of the sigmoid function to the Matrix using CUDA.
+func (m *Matrix) DSigmoid() *Matrix {
+	result := New(m.Row, m.Col)
+
+	// Flatten matrix
+	a := m.Flatten()
+	b := make([]float64, len(a))
+
+	// Call CUDA wrapper
+	C.cudaMatrixDSigmoid(
+		(*C.double)(unsafe.Pointer(&a[0])),
+		(*C.double)(unsafe.Pointer(&b[0])),
+		C.int(m.Row),
+		C.int(m.Col),
+	)
+
+	// Reshape result
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = b[i*m.Col+j]
+		}
+	}
+
+	return result
+}

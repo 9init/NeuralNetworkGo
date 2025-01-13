@@ -13,6 +13,8 @@ void cudaMatrixMul(double* d_A, double* d_B, double* d_C, int rowsA, int colsA, 
 void cudaMatrixHadamard(double* A, double* B, double* C, int rows, int cols);
 void cudaMatrixTranspose(double* A, double* C, int rows, int cols);
 void cudaMatrixScalarMul(double* A,  double* C, double scalar, int rows, int cols);
+void cudaMatrixSigmoid(double* A, double* C, int rows, int cols);
+void cudaMatrixDSigmoid(double* A, double* C, int rows, int cols);
 
 
 #ifdef __cplusplus

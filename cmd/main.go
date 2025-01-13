@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"neuraln"
+	"os"
 )
 
 func main() {
@@ -40,12 +41,10 @@ func main() {
 			return
 		}
 
-		fmt.Printf("Predicted: %f, Expected: %f\n", predictions[0], data[1][0])
-
 		roundedPrediction := math.Round(predictions[0])
 		if roundedPrediction != data[1][0] {
 			fmt.Printf("TestFeedForword failed on %v: expected %v, got %v, predictions: %v\n", data[0], data[1][0], roundedPrediction, predictions)
-			return
+			os.Exit(1)
 		}
 
 		fmt.Printf("Predected: %v, Expected: %v\n", roundedPrediction, data[1][0])

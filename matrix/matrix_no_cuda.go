@@ -3,6 +3,7 @@
 package matrix
 
 import (
+	"math"
 	"math/rand/v2"
 	"neuraln/errors"
 )
@@ -99,6 +100,28 @@ func (m *Matrix) ScalerMul(n float64) *Matrix {
 	for i := 0; i < m.Row; i++ {
 		for j := 0; j < m.Col; j++ {
 			result.Matrix[i][j] = m.Matrix[i][j] * n
+		}
+	}
+	return result
+}
+
+// Sigmoid applies the sigmoid function to each element of the Matrix and returns a new Matrix.
+func (m *Matrix) Sigmoid() *Matrix {
+	result := New(m.Row, m.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = 1 / (1 + math.Exp(-m.Matrix[i][j]))
+		}
+	}
+	return result
+}
+
+// DSigmoid applies the derivative of the sigmoid function to each element of the Matrix and returns a new Matrix.
+func (m *Matrix) DSigmoid() *Matrix {
+	result := New(m.Row, m.Col)
+	for i := 0; i < m.Row; i++ {
+		for j := 0; j < m.Col; j++ {
+			result.Matrix[i][j] = m.Matrix[i][j] * (1 - m.Matrix[i][j])
 		}
 	}
 	return result

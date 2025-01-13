@@ -32,7 +32,7 @@ func (neural *Neural) FeedForword(inputArray []float64) (*matrix.Matrix, error) 
 	if err != nil {
 		return nil, err
 	}
-	hidden = hidden.Map(sigmoid)
+	hidden = hidden.Sigmoid()
 
 	// Compute output layer activations
 	outputs, err := neural.WeightHO.DotProduct(hidden)
@@ -43,7 +43,7 @@ func (neural *Neural) FeedForword(inputArray []float64) (*matrix.Matrix, error) 
 	if err != nil {
 		return nil, err
 	}
-	outputs = outputs.Map(sigmoid)
+	outputs = outputs.Sigmoid()
 
 	return outputs, nil
 }
