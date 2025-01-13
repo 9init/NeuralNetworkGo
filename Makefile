@@ -27,9 +27,12 @@ $(CUDA_LIB): $(CUDA_SRC) $(C_SRC)
 # Default target
 all: build
 
+# Build CUDA shared library
+cuda: $(CUDA_LIB)
+
 # Build Go code with CUDA support
 build-cuda: $(CUDA_LIB)
-	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
+	# export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
 	go build -tags $(GO_TAGS) -o cmd/bin/main cmd/main.go
 
 # Run the Go program
@@ -47,30 +50,30 @@ build:
 
 # Run tests all without CUDA support
 test:
-	go test -timeout 0 -v -count=1 ./tests/...
+	go test -timeout 0 -v -count=1 ./neural/tests ./matrix/tests
 
 # Run tests all with CUDA support
 test-cuda: 
 	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
-	go test -v -count=1 -tags $(GO_TAGS) ./tests/...
+	go test -v -count=1 -tags $(GO_TAGS) ./neural/tests ./matrix/tests
 
 # Run tests without CUDA support
 test-nerual:
-	go test -timeout 0 -v -count=1 ./tests/nerual
+	go test -timeout 0 -v -count=1 ./neural/tests
 
 # Run tests with CUDA support
 test-nerual-cuda: $(CUDA_LIB)
 	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
-	go test -count=1 -tags $(GO_TAGS) ./tests/nerual
+	go test -count=1 -tags $(GO_TAGS) ./neural/tests
 
 # Run matrix tests without CUDA support
 test-matrix:
-	go test -timeout 0 -v -count=1 ./tests/matrix
+	go test -timeout 0 -v -count=1 ./matrix/tests
 
 # Run matrix tests with CUDA support
 test-matrix-cuda: $(CUDA_LIB)
 	export LD_LIBRARY_PATH=$(CUDA_LIB_PATH):$(ROOT_DIR)/matrix/cuda:$$LD_LIBRARY_PATH; \
-	go test -v -count=1 -tags $(GO_TAGS) ./tests/matrix
+	go test -v -count=1 -tags $(GO_TAGS) ./matrix/tests
 
 # Clean up build artifacts
 clean:
