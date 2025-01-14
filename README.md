@@ -322,7 +322,7 @@ The performance of the neural network and matrix operations depends on the probl
 - Use **CPU** for small-scale problems or when GPU resources are limited.
 - Use **GPU** for large-scale problems or when performance is critical (e.g., image classification, large matrix operations).
 
-*Note: All tests were performed on the following hardware: NVIDIA RTX 3090 (12GB) and AMD Ryzen 5 5600.*
+*Note: All tests were performed on the following hardware: NVIDIA RTX 3060 (12GB) and AMD Ryzen 5 5600.*
 
 ## Contributing
 
