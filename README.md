@@ -40,7 +40,7 @@ Whether you're a student, a hobbyist, or a developer curious about machine learn
 
 ### General Requirements
 - Go (version 1.20 or later)
-- CUDA Toolkit (for GPU support)
+- CUDA Toolkit 12 (for GPU support)
 - GCC or Clang (for building CUDA and C components)
 - Linux-based system (recommended for CUDA integration)
 
