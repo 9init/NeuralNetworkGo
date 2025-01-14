@@ -33,4 +33,19 @@ func TestLargeMatrix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("HadProduct failed: %v", err)
 	}
+
+	_, err = a.SubtractMatrix(b)
+	if err != nil {
+		t.Fatalf("SubtractMatrix failed: %v", err)
+	}
+
+	a.ScalerMul(2)
+
+	a.Transpose()
+
+	a.Randomize()
+
+	a.Sigmoid()
+
+	a.DSigmoid()
 }

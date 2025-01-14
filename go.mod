@@ -1,5 +1,5 @@
 module neuraln
 
-go 1.23.4
+go 1.20
 
 require golang.org/x/image v0.23.0 // indirect

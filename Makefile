@@ -24,11 +24,11 @@ endif
 
 # Ensure build directories exist
 $(BUILD_DIR) $(LIB_DIR) $(BIN_DIR):
-	mkdir -p $@
+	@mkdir -p $@
 
 # Compile CUDA and C code into a shared library
 $(CUDA_LIB): $(CUDA_MATRIX_SRC) $(C_MATRIX_SRC) | $(LIB_DIR)
-	nvcc $(NVCCFLAGS) -o $(CUDA_LIB) $(CUDA_MATRIX_SRC) $(C_MATRIX_SRC)
+	@nvcc $(NVCCFLAGS) -o $(CUDA_LIB) $(CUDA_MATRIX_SRC) $(C_MATRIX_SRC)
 
 # Default target
 all: build
@@ -38,47 +38,49 @@ cuda: $(CUDA_LIB)
 
 # Build Go code with CUDA support (embed RPATH using -extldflags)
 build-cuda: $(CUDA_LIB) | $(BIN_DIR)
-	go build -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" -o $(BIN_DIR)/main cmd/main.go
-
-# Run the Go program (no LD_LIBRARY_PATH needed)
-run-cuda: build-cuda
-	$(BIN_DIR)/main
-
-# Run the Go program without CUDA support
-run: build
-	$(BIN_DIR)/main
+	@go build -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" -o $(BIN_DIR)/main cmd/main.go
 
 # Build Go code without CUDA support
 build: | $(BIN_DIR)
-	go build -o $(BIN_DIR)/main cmd/main.go
+	@go build -o $(BIN_DIR)/main cmd/main.go
+
+# Run the compiled binary with or without CUDA support
+run: | $(BIN_DIR)
+	@$(BIN_DIR)/main
 
 # Run tests all without CUDA support
 test:
-	go test -timeout 0 -v -count=1 ./neural/tests ./matrix/tests
+	@echo "Testing without CUDA support"
+	@go test -timeout 0 -v -count=1 ./neural/tests ./matrix/tests
 
 # Run tests all with CUDA support (embed RPATH using -extldflags)
-test-cuda: $(CUDA_LIB)
-	go test -v -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./neural/tests ./matrix/tests
+test-cuda:
+	@echo "Testing with CUDA support"
+	@go test -v -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./neural/tests ./matrix/tests
 
 # Run tests without CUDA support
 test-nerual:
-	go test -timeout 0 -v -count=1 ./neural/tests
+	@echo "Testing Neural Network package without CUDA support"
+	@go test -timeout 0 -v -count=1 ./neural/tests
 
 # Run tests with CUDA support (embed RPATH using -extldflags)
 test-nerual-cuda: $(CUDA_LIB)
-	go test -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./neural/tests
+	@echo "Testing Neural Network package with CUDA support"
+	@go test -v -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./neural/tests
 
 # Run matrix tests without CUDA support
 test-matrix:
-	go test -timeout 0 -v -count=1 ./matrix/tests
+	@echo "Testing Matrix package without CUDA support"
+	@go test -timeout 0 -v -count=1 ./matrix/tests
 
 # Run matrix tests with CUDA support (embed RPATH using -extldflags)
 test-matrix-cuda: $(CUDA_LIB)
-	go test -v -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./matrix/tests
+	@echo "Testing Matrix package with CUDA support"
+	@go test -v -count=1 -tags $(GO_TAGS) -ldflags "-extldflags '-Wl,-rpath,$(LIB_DIR)'" ./matrix/tests
 
 # Clean up build artifacts
 clean:
-	rm -rf $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
 
 # Phony targets
 .PHONY: all build build-cuda run run-cuda test test-cuda clean test-matrix test-matrix-cuda test-nerual test-nerual-cuda
