@@ -71,29 +71,6 @@ The following environment variables can be optionally configured:
      ```
      *Note: Ensure that the CUDA Toolkit and GCC/Clang are installed on your system before running `make build-cuda`.*
 
----
-
-### Example of Using CUDA
-
-If you want to leverage CUDA for faster matrix operations, ensure that your system meets the prerequisites (CUDA Toolkit, GCC/Clang, and a compatible GPU). Then, build the project using the `make build-cuda` command. This will compile the CUDA-enabled components and link them with the Go code.
-
-After building with CUDA, you can run the neural network as usual, and it will automatically use the GPU for matrix operations where applicable.
-
----
-
-### Additional Notes
-
-- **CUDA Environment Setup**: Ensure that your environment variables (e.g., `LD_LIBRARY_PATH`) are correctly configured to include the CUDA library paths. For example:
-  ```bash
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
-  ```
-
-- **Testing CUDA Integration**: After building with CUDA, you can verify that the CUDA-enabled components are working by running the example code provided in the `main.go` file. The performance improvement should be noticeable for larger matrices and more complex networks.
-
----
-
-This addition ensures that users are aware of the CUDA build option and how to use it effectively.
-
 ## Usage
 
 The main components of the neural network are implemented in the `neural` package. You can create and train a neural network by interacting with this package.
