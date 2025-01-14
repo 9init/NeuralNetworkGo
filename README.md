@@ -1,5 +1,26 @@
 # NeuralN: A Simple Artificial Neural Network in Go
 
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Key Features](#key-features)
+3. [Why NeuralN?](#why-neuraln)
+4. [Prerequisites](#prerequisites)
+   - [General Requirements](#general-requirements)
+   - [Environment Variables (for CUDA)](#environment-variables-for-cuda)
+5. [Installation](#installation)
+6. [Usage](#usage)
+   - [Example](#example)
+7. [Performance Considerations](#performance-considerations)
+   - [Test Results](#test-results)
+   - [Recommendations](#recommendations)
+8. [Contributing](#contributing)
+9. [License](#license)
+10. [Acknowledgments](#acknowledgments)
+
+---
+
+## Introduction
+
 **NeuralN** is a lightweight and educational implementation of an artificial neural network (ANN) in Go. Designed with simplicity and clarity in mind, this project demonstrates the core concepts of neural networks, including forward propagation, backpropagation, and gradient descent. Whether you're new to machine learning or looking to explore how neural networks work under the hood, NeuralN provides a hands-on way to understand these concepts in a clean and efficient Go environment.
 
 ### Key Features:
@@ -18,42 +39,36 @@ Whether you're a student, a hobbyist, or a developer curious about machine learn
 ## Prerequisites
 
 ### General Requirements
-
 - Go (version 1.20 or later)
 - CUDA Toolkit (for GPU support)
 - GCC or Clang (for building CUDA and C components)
 - Linux-based system (recommended for CUDA integration)
 
-### Environment Variables *(for CUDA)*
+### Environment Variables (for CUDA)
 The following environment variables can be optionally configured:
 - `LD_LIBRARY_PATH`: Include the directory for the shared CUDA library, e.g., `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64`.
 
 ## Installation
 
 1. **Clone the repository**:
-
    ```bash
    git clone https://github.com/9init/neuraln.git
    ```
 
 2. **Navigate to the project directory**:
-
    ```bash
    cd neuraln
    ```
 
 3. **Build the project**:
-
    - For a standard build (CPU-only):
      ```bash
      make build
      ```
-
    - For a CUDA-enabled build (GPU acceleration):
      ```bash
      make build-cuda
      ```
-
      *Note: Ensure that the CUDA Toolkit and GCC/Clang are installed on your system before running `make build-cuda`.*
 
 ---
@@ -82,10 +97,6 @@ This addition ensures that users are aware of the CUDA build option and how to u
 ## Usage
 
 The main components of the neural network are implemented in the `neural` package. You can create and train a neural network by interacting with this package.
-
-Here’s the updated **Example** section of your README, now including a mention of where the example is located (`cmd/main.go`) and how to run it using `make run`:
-
----
 
 ### Example
 
